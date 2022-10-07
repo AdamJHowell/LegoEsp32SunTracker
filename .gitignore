@@ -3,3 +3,4 @@ cmake-build-*/
 privateInfo.h
 cmake-build-debug
 cmake-build-esp_wroom_02
+.idea/

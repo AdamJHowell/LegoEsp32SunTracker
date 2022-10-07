@@ -18,14 +18,14 @@ include_directories( .
 		C:/Code/Arduino/libraries/ArduinoJson/
 		C:/Code/Arduino/libraries/PubSubClient/src/
 		C:/Code/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/
-		"C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/"
-		"C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/"
 		C:/Users/Adam/AppData/Local/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
 		C:/Users/Adam/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/3.0.2/libraries/ESP8266mDNS/src/
 		C:/Users/Adam/AppData/Local/Arduino15/packages/esp8266/hardware/esp8266/3.0.2/libraries/ArduinoOTA/
 		C:/Code/Arduino/libraries/
 		C:/Code/Arduino/libraries/ArduinoJson/
 		C:/Code/Arduino/libraries/PubSubClient/src/
+		"C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/"
+		"C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/"
 		"C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/"
 		"C:/Program Files (x86)/Arduino/hardware/tools/avr/lib/gcc/avr/7.3.0/include/"
 		"C:/Users/Adam/AppData/Local/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/"
