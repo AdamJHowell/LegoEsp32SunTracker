@@ -5,6 +5,8 @@ set( CMAKE_CXX_STANDARD 14 )
 
 add_executable( LegoEsp32SunTracker
 		LegoEsp32SunTracker.ino
+		LegoEsp32SunTracker.h
+		NetworkFunctions.ino
 		privateInfo.h
 		)
 

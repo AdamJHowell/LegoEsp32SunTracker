@@ -2,6 +2,16 @@
 
 This is a simple sun tracker, made using Lego Technic pieces for the structural components, and using Lego-compatible servos to control azimuth and elevation.
 
+## Libraries
+
+https://pubsubclient.knolleary.net/
+
+https://github.com/madhephaestus/ESP32Servo
+
+https://arduinojson.org/
+
+A servo library tutorial is described at https://dronebotworkshop.com/esp32-servo/
+
 ## Green Servo Specifications:
 
 | Characteristic       | Value                          |
