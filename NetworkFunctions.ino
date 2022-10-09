@@ -13,7 +13,7 @@
  */
 void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
-  Serial.printf( "New message on topic '%s'\n", topic );
+	Serial.printf( "New message on topic '%s'\n", topic );
 	// ToDo: Determine which commands this device should respond to.
 	if( length > 0 )
 	{
@@ -144,7 +144,7 @@ void configureOTA()
 	// The ESP8266 port defaults to 8266
 	// ArduinoOTA.setPort( 8266 );
 	// Authentication is disabled by default.
-	// ArduinoOTA.setPassword( ( const char * )"admin" );
+	// ArduinoOTA.setPassword( ( const char * ) "admin" );
 #elif ESP32
 	// The ESP32 hostname defaults to esp32-[MAC]
 	// The ESP32 port defaults to 3232
@@ -167,40 +167,40 @@ void configureOTA()
 
 	// Configure the OTA callbacks.
 	// Port defaults to 8266
-	// ArduinoOTA.setPort(8266);
+	// ArduinoOTA.setPort( 8266 );
 
 	// Hostname defaults to esp8266-[ChipID]
-	// ArduinoOTA.setHostname("myesp8266");
+	// ArduinoOTA.setHostname( "myesp8266" );
 
 	// No authentication by default
-	// ArduinoOTA.setPassword("admin");
+	// ArduinoOTA.setPassword( "admin" );
 
 	// Password can be set with it's md5 value as well
 	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
-	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
 
 	ArduinoOTA.onStart( []()
 							  {
 								  String type;
-								  if (ArduinoOTA.getCommand() == U_FLASH)
+								  if( ArduinoOTA.getCommand() == U_FLASH )
 									  type = "sketch";
 								  else // U_SPIFFS
 									  type = "filesystem";
 
 								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-								  Serial.println("Start updating " + type); } );
+								  Serial.println( "Start updating " + type ); } );
 	ArduinoOTA.onEnd( []()
 							{ Serial.println( "\nEnd" ); } );
 	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total )
 								  { Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
 	ArduinoOTA.onError( []( ota_error_t error )
 							  {
-								  Serial.printf("Error[%u]: ", error);
-								  if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-								  else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-								  else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-								  else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-								  else if (error == OTA_END_ERROR) Serial.println("End Failed"); } );
+								  Serial.printf( "Error[%u]: ", error );
+								  if( error == OTA_AUTH_ERROR ) Serial.println( "Auth Failed" );
+								  else if( error == OTA_BEGIN_ERROR ) Serial.println( "Begin Failed" );
+								  else if( error == OTA_CONNECT_ERROR ) Serial.println( "Connect Failed" );
+								  else if( error == OTA_RECEIVE_ERROR ) Serial.println( "Receive Failed" );
+								  else if( error == OTA_END_ERROR ) Serial.println( "End Failed" ); } );
 
 	// Start listening for OTA commands.
 	ArduinoOTA.begin();
@@ -222,7 +222,7 @@ void wifiMultiConnect()
 		const char *wifiSsid = wifiSsidArray[networkArrayIndex];
 		const char *wifiPassword = wifiPassArray[networkArrayIndex];
 
-		// Announce the WiFi parameters for this connection attempt.
+		// Announce the Wi-Fi parameters for this connection attempt.
 		Serial.print( "Attempting to connect to SSID \"" );
 		Serial.print( wifiSsid );
 		Serial.println( "\"" );
@@ -230,7 +230,7 @@ void wifiMultiConnect()
 		// Don't even try to connect if the SSID cannot be found.
 		if( checkForSSID( wifiSsid ) )
 		{
-			// Attempt to connect to this WiFi network.
+			// Attempt to connect to this Wi-Fi network.
 			Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
 			if( WiFi.setHostname( HOST_NAME ) )
 				Serial.printf( "Network hostname set to '%s'\n", HOST_NAME );
@@ -262,7 +262,7 @@ void wifiMultiConnect()
 			{
 				// Set the global 'networkIndex' to the index which successfully connected.
 				networkIndex = networkArrayIndex;
-				// Print that WiFi has connected.
+				// Print that Wi-Fi has connected.
 				Serial.println( "\nWiFi connection established!" );
 				snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
 				Serial.printf( "IP address: %s", ipAddress );
@@ -306,7 +306,7 @@ int checkForSSID( const char *ssidName )
 
 /*
  * mqttMultiConnect() will:
- * 1. Check the WiFi connection, and reconnect WiFi as needed.
+ * 1. Check the Wi-Fi connection, and reconnect Wi-Fi as needed.
  * 2. Attempt to connect the MQTT client designated in 'mqttBrokerArray[networkIndex]' up to 'maxAttempts' number of times.
  * 3. Subscribe to the topic defined in 'MQTT_COMMAND_TOPIC'.
  * If the broker connection cannot be made, an error will be printed to the serial port.
@@ -319,7 +319,7 @@ int mqttMultiConnect( int maxAttempts )
 
 	/*
 	 * The networkIndex variable is initialized to 2112.
-	 * If it is still 2112 at this point, then WiFi failed to connect.
+	 * If it is still 2112 at this point, then Wi-Fi failed to connect.
 	 * This is only needed to display the name and port of the broker being used.
 	 */
 	if( networkIndex != 2112 )

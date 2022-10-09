@@ -22,7 +22,10 @@ void setup()
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	elevationServo.attach( elevationServoPin, minPulseWidth, maxPulseWidth );
 	elevationServo.write( elevationPosition );
-	pinMode( 2, OUTPUT );
+	// Set GPIO 2 (MCU_LED) as an output.
+	pinMode( MCU_LED, OUTPUT );
+	// Turn the LED on.
+	digitalWrite( MCU_LED, HIGH );
 
 	wifiMultiConnect();
 	configureOTA();
@@ -31,8 +34,8 @@ void setup()
 
 void loop()
 {
-	digitalWrite( 2, HIGH );
-	Serial.printf( "LED is %d\n", digitalRead( 2 ) );
+	digitalWrite( MCU_LED, HIGH );
+	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp up from 90 to 180.
 	for( azimuthPosition = 90; azimuthPosition < 170; azimuthPosition += 1 )
@@ -42,8 +45,8 @@ void loop()
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
 	delay( 3000 );
-	digitalWrite( 2, LOW );
-	Serial.printf( "LED is %d\n", digitalRead( 2 ) );
+	digitalWrite( MCU_LED, LOW );
+	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp down from 180 to 90.
 	for( azimuthPosition = 170; azimuthPosition > 90; azimuthPosition -= 1 )
@@ -53,8 +56,8 @@ void loop()
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
 	delay( 3000 );
-	digitalWrite( 2, HIGH );
-	Serial.printf( "LED is %d\n", digitalRead( 2 ) );
+	digitalWrite( MCU_LED, HIGH );
+	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp down from 90 to 0.
 	for( azimuthPosition = 90; azimuthPosition > 10; azimuthPosition -= 1 )
@@ -64,8 +67,8 @@ void loop()
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
 	delay( 3000 );
-	digitalWrite( 2, LOW );
-	Serial.printf( "LED is %d\n", digitalRead( 2 ) );
+	digitalWrite( MCU_LED, LOW );
+	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp up from 0 to 90.
 	for( azimuthPosition = 10; azimuthPosition < 90; azimuthPosition += 1 )
