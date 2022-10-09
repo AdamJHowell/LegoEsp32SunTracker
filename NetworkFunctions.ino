@@ -341,3 +341,18 @@ void publishStats()
 			Serial.print( "\n\nPublish failed!\n\n" );
 	}
 } // End of publishStats() function.
+
+
+void readTelemetry()
+{
+}
+
+
+void publishTelemetry()
+{
+}
+
+
+void printTelemetry()
+{
+}

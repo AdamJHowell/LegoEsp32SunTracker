@@ -16,7 +16,7 @@ void setup()
 	azimuthServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 23, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
-	azimuthServo.write( azimuthPosition );
+	azimuthServo.writeMicroseconds( azimuthPosition );
 	// Standard 50 hz servo.
 	altitudeServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
@@ -41,7 +41,7 @@ void azimuthDemo()
 	// Ramp up from 90 to 180.
 	for( azimuthPosition = 90; azimuthPosition < 170; azimuthPosition += 1 )
 	{
-		azimuthServo.write( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthPosition );
 		delay( 20 );
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
@@ -52,7 +52,7 @@ void azimuthDemo()
 	// Ramp down from 180 to 90.
 	for( azimuthPosition = 170; azimuthPosition > 90; azimuthPosition -= 1 )
 	{
-		azimuthServo.write( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthPosition );
 		delay( 20 );
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
@@ -63,8 +63,7 @@ void azimuthDemo()
 	// Ramp down from 90 to 0.
 	for( azimuthPosition = 90; azimuthPosition > 10; azimuthPosition -= 1 )
 	{
-		azimuthServo.write( azimuthPosition );
-		azimuthServo.writeMicroseconds();
+		azimuthServo.writeMicroseconds( azimuthPosition );
 		delay( 20 );
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
@@ -75,7 +74,7 @@ void azimuthDemo()
 	// Ramp up from 0 to 90.
 	for( azimuthPosition = 10; azimuthPosition < 90; azimuthPosition += 1 )
 	{
-		azimuthServo.write( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthPosition );
 		delay( 20 );
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
@@ -92,15 +91,15 @@ void loop()
 	mqttClient.loop();
 
 	unsigned long time = millis();
-	if( lastPollTime == 0 || ( ( time > sensorPollDelay ) && ( time - sensorPollDelay ) > lastPollTime ) )
+	if( lastTelemetryPollTime == 0 || ( ( time > telemetryPollInterval ) && ( time - telemetryPollInterval ) > lastTelemetryPollTime ) )
 	{
 		readTelemetry();
 		printTelemetry();
-		lastPollTime = millis();
+		lastTelemetryPollTime = millis();
 	}
 
 	time = millis();
-	if( lastPublishTime == 0 || ( ( time > publishDelay ) && ( time - publishDelay ) > lastPublishTime ) )
+	if( lastPublishTime == 0 || ( ( time > publishInterval ) && ( time - publishInterval ) > lastPublishTime ) )
 	{
 		publishTelemetry();
 		lastPublishTime = millis();
