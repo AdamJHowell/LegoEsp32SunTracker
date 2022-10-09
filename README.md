@@ -1,16 +1,17 @@
 # Lego ESP32 Sun Tracker
 
-This is a simple sun tracker, made using Lego Technic pieces for the structural components, and using Lego-compatible servos to control azimuth and elevation.
+This is a simple sun tracker, made using Lego Technic pieces for the structural components, and using Lego-compatible servos to control azimuth and altitude.  
+Control will use the standard [Horizontal coordinate system](https://en.wikipedia.org/wiki/Horizontal_coordinate_system).
 
 ## Libraries
 
-PubSubClient by Nick O’Leary: https://pubsubclient.knolleary.net/
+[PubSubClient by Nick O’Leary](https://pubsubclient.knolleary.net/)
 
-ESP32 Servo: https://github.com/madhephaestus/ESP32Servo - Documentation: https://madhephaestus.github.io/ESP32Servo/annotated.html
+[ESP32 Servo](https://github.com/madhephaestus/ESP32Servo) - [Documentation](https://madhephaestus.github.io/ESP32Servo/annotated.html)
 
-A servo library tutorial is described at https://dronebotworkshop.com/esp32-servo/
+A servo library tutorial is described [here](https://dronebotworkshop.com/esp32-servo/)
 
-Arduino JSON by Benoît Blanchon: https://arduinojson.org/
+[Arduino JSON by Benoît Blanchon](https://arduinojson.org/)
 
 ## Green Servo Specifications:
 
@@ -68,3 +69,16 @@ Arduino JSON by Benoît Blanchon: https://arduinojson.org/
 ### Standard Test Environment
 
 Every test at temperature: 25 ±5° C and relative humidity: 65 ±10％.
+
+## MQTT messages
+
+Move servo example:
+{
+"command":   "moveServo",
+"servoName": "altitude",
+"value":     20
+}
+
+Valid "servoName" values are "azimuth" and "altitude".
+For altitude, value will be an integer angle from 0 to 90. The servo is capable of rotation between 0° and 360°, but this is being constrained to prevent interference with other structures.
+For azimuth, value will be an integer speed from -100 to 100. Values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above.

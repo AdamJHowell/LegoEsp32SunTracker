@@ -20,14 +20,18 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 	if( length > 0 )
 	{
 		callbackCount++;
+		// Create a document named callbackJsonDoc to hold the callback payload.
 		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
+		// Deserialize payload into callbackJsonDoc.
 		deserializeJson( callbackJsonDoc, payload, length );
 
 		if( callbackJsonDoc.containsKey( "command" ) )
 		{
-			// Available commands are: TakePicture and publishStats.
+			// Store the command value.
 			const char *command = callbackJsonDoc["command"];
-			if( strcmp( command, "TakePicture" ) == 0 )
+
+			// Available commands are: moveServo and publishStats.
+			if( strcmp( command, "moveServo" ) == 0 )
 			{
 				Serial.println( "TakePicture command processed." );
 			}
@@ -49,23 +53,25 @@ void configureOTA()
 	Serial.println( "Configuring OTA." );
 
 #ifdef ESP8266
-	// The ESP8266 hostname defaults to esp8266-[ChipID]
-	// The ESP8266 port defaults to 8266
+	// The ESP8266 hostname defaults to esp8266-[ChipID].
+	// The ESP8266 port defaults to 8266.
 	// ArduinoOTA.setPort( 8266 );
 	// Authentication is disabled by default.
 	// ArduinoOTA.setPassword( ( const char * ) "admin" );
 #elif ESP32
-	// The ESP32 hostname defaults to esp32-[MAC]
-	// The ESP32 port defaults to 3232
+	// The ESP32 hostname defaults to esp32-[MAC].
+	// The ESP32 port defaults to 3232.
 	// ArduinoOTA.setPort( 3232 );
 	// Authentication is disabled by default.
 	// ArduinoOTA.setPassword( "admin" );
-	// Password can be set with it's md5 value as well
-	// MD5( admin ) = 21232f297a57a5a743894a0e4a801fc3
+	// Password can be set with it's md5 value as well.
+	// MD5( admin ) = 21232f297a57a5a743894a0e4a801fc3.
 	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
 #else
 	// ToDo: Verify how stock Arduino code is meant to handle the port, username, and password.
 #endif
+
+	// ArduinoOTA is a class-defined object.
 	ArduinoOTA.setHostname( HOST_NAME );
 
 	Serial.printf( "Using hostname '%s'\n", HOST_NAME );
@@ -75,17 +81,17 @@ void configureOTA()
 		type = "sketch";
 
 	// Configure the OTA callbacks.
-	// Port defaults to 8266
+	// Port defaults to 8266.
 	// ArduinoOTA.setPort( 8266 );
 
-	// Hostname defaults to esp8266-[ChipID]
+	// Hostname defaults to esp8266-[ChipID].
 	// ArduinoOTA.setHostname( "myesp8266" );
 
-	// No authentication by default
+	// No authentication by default.
 	// ArduinoOTA.setPassword( "admin" );
 
-	// Password can be set with it's md5 value as well
-	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// Password can be set with it's md5 value as well.
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3.
 	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
 
 	ArduinoOTA.onStart( []()

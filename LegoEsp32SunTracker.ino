@@ -18,10 +18,11 @@ void setup()
 	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
 	azimuthServo.write( azimuthPosition );
 	// Standard 50 hz servo.
-	elevationServo.setPeriodHertz( 50 );
+	altitudeServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
-	elevationServo.attach( elevationServoPin, minPulseWidth, maxPulseWidth );
-	elevationServo.write( elevationPosition );
+	altitudeServo.attach( altitudeServoPin, minPulseWidth, maxPulseWidth );
+	setAltitude( 45 );
+	setAzimuthSpeed( 0 );
 	// Set GPIO 2 (MCU_LED) as an output.
 	pinMode( MCU_LED, OUTPUT );
 	// Turn the LED on.
