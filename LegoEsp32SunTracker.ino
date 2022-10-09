@@ -63,6 +63,7 @@ void loop()
 	for( azimuthPosition = 90; azimuthPosition > 10; azimuthPosition -= 1 )
 	{
 		azimuthServo.write( azimuthPosition );
+		azimuthServo.writeMicroseconds();
 		delay( 20 );
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );

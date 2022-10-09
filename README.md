@@ -4,13 +4,13 @@ This is a simple sun tracker, made using Lego Technic pieces for the structural 
 
 ## Libraries
 
-https://pubsubclient.knolleary.net/
+PubSubClient by Nick O’Leary: https://pubsubclient.knolleary.net/
 
-https://github.com/madhephaestus/ESP32Servo
-
-https://arduinojson.org/
+ESP32 Servo: https://github.com/madhephaestus/ESP32Servo - Documentation: https://madhephaestus.github.io/ESP32Servo/annotated.html
 
 A servo library tutorial is described at https://dronebotworkshop.com/esp32-servo/
+
+Arduino JSON by Benoît Blanchon: https://arduinojson.org/
 
 ## Green Servo Specifications:
 

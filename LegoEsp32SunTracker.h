@@ -79,8 +79,9 @@ void configureOTA();
 void wifiMultiConnect();
 int checkForSSID( const char *ssidName );
 int mqttMultiConnect( int maxAttempts );
+void moveServo( Servo servoToMove, int pwm );
 void publishStats();
-void readTelemetry();
-void printTelemetry();
+void readTelemetry();  // Not yet implemented.
+void printTelemetry(); // Not yet implemented.
 
 #endif // LEGO_ESP32_SUN_TRACKER_H

@@ -15,117 +15,26 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
 	Serial.printf( "New message on topic '%s'\n", topic );
 	// ToDo: Determine which commands this device should respond to.
+	// void moveServo( Servo servoToMove, int pwm );
+	// digitalWrite( MCU_LED, HIGH );
 	if( length > 0 )
 	{
 		callbackCount++;
 		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
 		deserializeJson( callbackJsonDoc, payload, length );
 
-		// Available commands are: TakePicture and publishStats.
-		const char *command = callbackJsonDoc["command"];
-		if( strcmp( command, "TakePicture" ) == 0 )
+		if( callbackJsonDoc.containsKey( "command" ) )
 		{
-			Serial.println( "TakePicture command processed." );
-		}
-		else if( strcmp( command, "publishStats" ) == 0 )
-			publishStats();
-		else
-			Serial.printf( "Unknown command: '%s'\n", command );
-	}
-	// ToDo: Fix all of this to use the block above!!!
-	for( unsigned int i = 0; i < length; i++ )
-	{
-		char receivedKey = ( char )payload[i];
-		Serial.println( receivedKey );
-
-		if( receivedKey == 't' ) // Process throttle changes.
-		{
-			if( length > 1 )
+			// Available commands are: TakePicture and publishStats.
+			const char *command = callbackJsonDoc["command"];
+			if( strcmp( command, "TakePicture" ) == 0 )
 			{
-				// Store the 0-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				throttleChange( receivedValue - '0' );
+				Serial.println( "TakePicture command processed." );
 			}
-		}
-		else if( receivedKey == 'c' ) // Process collective changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				collectiveChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'r' ) // Process rudder changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				rudderChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'f' ) // Process floodlight changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				floodLightChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'l' ) // Process green TLOF circle LED changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				tlofLightChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'a' ) // Process white FATO square LED changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 0-1 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				fatoLightChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'c' ) // Process collective changes.
-		{
-			if( length > 1 )
-			{
-				// Store the 1-9 value in receivedValue.
-				char receivedValue = ( char )payload[i + 1];
-				// Increment the index since it was consumed.
-				i++;
-				// Convert the ASCII value to decimal.
-				collectiveChange( receivedValue - '0' );
-			}
-		}
-		else if( receivedKey == 'k' ) // Kill switch!
-		{
-			// Turn everything off.
-			killSwitch();
+			else if( strcmp( command, "publishStats" ) == 0 )
+				publishStats();
+			else
+				Serial.printf( "Unknown command: '%s'\n", command );
 		}
 	}
 } // End of onReceiveCallback() function.
@@ -223,14 +132,12 @@ void wifiMultiConnect()
 		const char *wifiPassword = wifiPassArray[networkArrayIndex];
 
 		// Announce the Wi-Fi parameters for this connection attempt.
-		Serial.print( "Attempting to connect to SSID \"" );
-		Serial.print( wifiSsid );
-		Serial.println( "\"" );
+		Serial.printf( "Attempting to connect to SSID '%s'.\n", wifiSsid );
 
 		// Don't even try to connect if the SSID cannot be found.
 		if( checkForSSID( wifiSsid ) )
 		{
-			// Attempt to connect to this Wi-Fi network.
+			// Set the Wi-Fi mode to station.
 			Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
 			if( WiFi.setHostname( HOST_NAME ) )
 				Serial.printf( "Network hostname set to '%s'\n", HOST_NAME );
@@ -265,7 +172,7 @@ void wifiMultiConnect()
 				// Print that Wi-Fi has connected.
 				Serial.println( "\nWiFi connection established!" );
 				snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
-				Serial.printf( "IP address: %s", ipAddress );
+				Serial.printf( "IP address: %s\n", ipAddress );
 				return;
 			}
 			else
@@ -370,7 +277,7 @@ int mqttMultiConnect( int maxAttempts )
 				MQTT_CONNECT_BAD_CREDENTIALS 4
 				MQTT_CONNECT_UNAUTHORIZED    5
 			*/
-			Serial.printf( " failed!  Return code: %d", mqttState );
+			Serial.printf( " failed!  Return code: %d\n", mqttState );
 			if( mqttState == -4 )
 				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
 			else if( mqttState == 2 )
@@ -421,13 +328,7 @@ void publishStats()
 	{
 		if( mqttClient.connected() && mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
 		{
-			Serial.print( "Published to this broker and port: " );
-			Serial.print( mqttBrokerArray[networkIndex] );
-			Serial.print( ":" );
-			Serial.print( mqttPortArray[networkIndex] );
-			Serial.print( " to this topic: '" );
-			Serial.print( MQTT_STATS_TOPIC );
-			Serial.println( "':" );
+			Serial.printf( "Published to this broker: '%s:%d' on this topic '%s'.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], MQTT_STATS_TOPIC );
 			Serial.println( mqttStatsString );
 		}
 		else
