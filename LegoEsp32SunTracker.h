@@ -25,6 +25,7 @@ int checkForSSID( const char *ssidName );
 int mqttMultiConnect( int maxAttempts );
 void setAltitude( int angle );
 void setAzimuthSpeed( int speed );
+void azimuthDemo();
 void publishStats();
 void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.

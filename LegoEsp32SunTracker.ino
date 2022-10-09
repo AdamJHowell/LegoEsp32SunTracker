@@ -30,10 +30,10 @@ void setup()
 
 	wifiMultiConnect();
 	configureOTA();
-}
+} // End of setup() function.
 
 
-void loop()
+void azimuthDemo()
 {
 	digitalWrite( MCU_LED, HIGH );
 	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
@@ -80,6 +80,29 @@ void loop()
 	}
 	Serial.printf( "Servo at %d\n", azimuthPosition );
 	delay( 3000 );
+} // End of azimuthDemo() function.
 
-	Serial.println( "End of loop.\n" );
-}
+
+void loop()
+{
+	ArduinoOTA.handle();
+	if( !mqttClient.connected() )
+		mqttMultiConnect( 5 );
+	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
+	mqttClient.loop();
+
+	unsigned long time = millis();
+	if( lastPollTime == 0 || ( ( time > sensorPollDelay ) && ( time - sensorPollDelay ) > lastPollTime ) )
+	{
+		readTelemetry();
+		printTelemetry();
+		lastPollTime = millis();
+	}
+
+	time = millis();
+	if( lastPublishTime == 0 || ( ( time > publishDelay ) && ( time - publishDelay ) > lastPublishTime ) )
+	{
+		publishTelemetry();
+		lastPublishTime = millis();
+	}
+} // End of loop() function.
