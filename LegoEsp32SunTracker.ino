@@ -27,6 +27,9 @@ void setup()
 	// Turn the LED on.
 	digitalWrite( MCU_LED, HIGH );
 
+	// Set the MAC address variable to its value.
+	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
+
 	wifiMultiConnect();
 	configureOTA();
 
