@@ -106,5 +106,10 @@ void loop()
 	{
 		publishTelemetry();
 		lastPublishTime = millis();
+		if( altitudePosition < 90 )
+			altitudePosition += 45;
+		else
+			altitudePosition = 0;
+		setAltitude( altitudePosition );
 	}
 } // End of loop() function.
