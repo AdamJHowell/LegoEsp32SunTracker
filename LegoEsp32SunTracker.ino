@@ -16,13 +16,12 @@ void setup()
 	azimuthServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 23, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
-	azimuthServo.writeMicroseconds( azimuthPosition );
+	setAzimuthSpeed( azimuthSpeed );
 	// Standard 50 hz servo.
 	altitudeServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	altitudeServo.attach( altitudeServoPin, minPulseWidth, maxPulseWidth );
-	setAltitude( 45 );
-	setAzimuthSpeed( 0 );
+	setAltitude( altitudePosition );
 	// Set GPIO 2 (MCU_LED) as an output.
 	pinMode( MCU_LED, OUTPUT );
 	// Turn the LED on.
@@ -30,6 +29,8 @@ void setup()
 
 	wifiMultiConnect();
 	configureOTA();
+
+	azimuthSpeed = 50;
 } // End of setup() function.
 
 
@@ -39,45 +40,45 @@ void azimuthDemo()
 	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp up from 90 to 180.
-	for( azimuthPosition = 90; azimuthPosition < 170; azimuthPosition += 1 )
+	for( azimuthSpeed = 90; azimuthSpeed < 170; azimuthSpeed += 1 )
 	{
-		azimuthServo.writeMicroseconds( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthSpeed );
 		delay( 20 );
 	}
-	Serial.printf( "Servo at %d\n", azimuthPosition );
+	Serial.printf( "Servo at %d\n", azimuthSpeed );
 	delay( 3000 );
 	digitalWrite( MCU_LED, LOW );
 	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp down from 180 to 90.
-	for( azimuthPosition = 170; azimuthPosition > 90; azimuthPosition -= 1 )
+	for( azimuthSpeed = 170; azimuthSpeed > 90; azimuthSpeed -= 1 )
 	{
-		azimuthServo.writeMicroseconds( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthSpeed );
 		delay( 20 );
 	}
-	Serial.printf( "Servo at %d\n", azimuthPosition );
+	Serial.printf( "Servo at %d\n", azimuthSpeed );
 	delay( 3000 );
 	digitalWrite( MCU_LED, HIGH );
 	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp down from 90 to 0.
-	for( azimuthPosition = 90; azimuthPosition > 10; azimuthPosition -= 1 )
+	for( azimuthSpeed = 90; azimuthSpeed > 10; azimuthSpeed -= 1 )
 	{
-		azimuthServo.writeMicroseconds( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthSpeed );
 		delay( 20 );
 	}
-	Serial.printf( "Servo at %d\n", azimuthPosition );
+	Serial.printf( "Servo at %d\n", azimuthSpeed );
 	delay( 3000 );
 	digitalWrite( MCU_LED, LOW );
 	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
 
 	// Ramp up from 0 to 90.
-	for( azimuthPosition = 10; azimuthPosition < 90; azimuthPosition += 1 )
+	for( azimuthSpeed = 10; azimuthSpeed < 90; azimuthSpeed += 1 )
 	{
-		azimuthServo.writeMicroseconds( azimuthPosition );
+		azimuthServo.writeMicroseconds( azimuthSpeed );
 		delay( 20 );
 	}
-	Serial.printf( "Servo at %d\n", azimuthPosition );
+	Serial.printf( "Servo at %d\n", azimuthSpeed );
 	delay( 3000 );
 } // End of azimuthDemo() function.
 
@@ -96,6 +97,8 @@ void loop()
 		readTelemetry();
 		printTelemetry();
 		lastTelemetryPollTime = millis();
+		azimuthSpeed = -azimuthSpeed;
+		setAzimuthSpeed( azimuthSpeed );
 	}
 
 	time = millis();
