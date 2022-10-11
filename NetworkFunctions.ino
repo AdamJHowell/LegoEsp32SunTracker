@@ -130,6 +130,8 @@ void configureOTA()
  */
 void wifiMultiConnect()
 {
+  digitalWrite( MCU_LED, LOW );
+  
 	Serial.println( "\nEntering wifiMultiConnect()" );
 	for( size_t networkArrayIndex = 0; networkArrayIndex < sizeof( wifiSsidArray ); networkArrayIndex++ )
 	{
@@ -179,6 +181,7 @@ void wifiMultiConnect()
 				Serial.println( "\nWiFi connection established!" );
 				snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
 				Serial.printf( "IP address: %s\n", ipAddress );
+        digitalWrite( MCU_LED, HIGH );
 				return;
 			}
 			else
@@ -224,6 +227,8 @@ int checkForSSID( const char *ssidName )
  */
 int mqttMultiConnect( int maxAttempts )
 {
+  digitalWrite( MCU_LED, LOW );
+
 	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
 	if( WiFi.status() != WL_CONNECTED )
 		wifiMultiConnect();
@@ -255,6 +260,7 @@ int mqttMultiConnect( int maxAttempts )
 		if( mqttClient.connect( clientId ) )
 		{
 			Serial.println( " connected." );
+      digitalWrite( MCU_LED, HIGH );
 			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
 			{
 				Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
