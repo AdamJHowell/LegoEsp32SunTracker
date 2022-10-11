@@ -315,24 +315,24 @@ int mqttMultiConnect( int maxAttempts )
  */
 void publishStats()
 {
-	char mqttStatsString[JSON_DOC_SIZE];
-	// Create a JSON Document on the stack.
-	StaticJsonDocument<JSON_DOC_SIZE> statsJsonDoc;
-	// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, publishCount
-	statsJsonDoc["sketch"] = SKETCH_NAME;
-	statsJsonDoc["mac"] = macAddress;
-	statsJsonDoc["ip"] = ipAddress;
-	statsJsonDoc["rssi"] = rssi;
-	statsJsonDoc["publishCount"] = publishCount;
-
-	// Serialize statsJsonDoc into mqttStatsString, with indentation and line breaks.
-	serializeJsonPretty( statsJsonDoc, mqttStatsString );
-
-	Serial.printf( "Publishing stats to the '%s' topic.\n", MQTT_STATS_TOPIC );
-
 	if( mqttClient.connected() )
 	{
-		if( mqttClient.connected() && mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
+		char mqttStatsString[JSON_DOC_SIZE];
+		// Create a JSON Document on the stack.
+		StaticJsonDocument<JSON_DOC_SIZE> statsJsonDoc;
+		// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, publishCount
+		statsJsonDoc["sketch"] = SKETCH_NAME;
+		statsJsonDoc["mac"] = macAddress;
+		statsJsonDoc["ip"] = ipAddress;
+		statsJsonDoc["rssi"] = rssi;
+		statsJsonDoc["publishCount"] = publishCount;
+
+		// Serialize statsJsonDoc into mqttStatsString, with indentation and line breaks.
+		serializeJsonPretty( statsJsonDoc, mqttStatsString );
+
+		Serial.printf( "Publishing stats to the '%s' topic.\n", MQTT_STATS_TOPIC );
+
+		if( mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
 		{
 			Serial.printf( "Published to this broker: '%s:%d' on this topic '%s'.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], MQTT_STATS_TOPIC );
 			Serial.println( mqttStatsString );

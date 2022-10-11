@@ -38,55 +38,6 @@ void setup()
 } // End of setup() function.
 
 
-void azimuthDemo()
-{
-	digitalWrite( MCU_LED, HIGH );
-	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
-
-	// Ramp up from 90 to 180.
-	for( azimuthSpeed = 90; azimuthSpeed < 170; azimuthSpeed += 1 )
-	{
-		azimuthServo.writeMicroseconds( azimuthSpeed );
-		delay( 20 );
-	}
-	Serial.printf( "Servo at %d\n", azimuthSpeed );
-	delay( 3000 );
-	digitalWrite( MCU_LED, LOW );
-	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
-
-	// Ramp down from 180 to 90.
-	for( azimuthSpeed = 170; azimuthSpeed > 90; azimuthSpeed -= 1 )
-	{
-		azimuthServo.writeMicroseconds( azimuthSpeed );
-		delay( 20 );
-	}
-	Serial.printf( "Servo at %d\n", azimuthSpeed );
-	delay( 3000 );
-	digitalWrite( MCU_LED, HIGH );
-	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
-
-	// Ramp down from 90 to 0.
-	for( azimuthSpeed = 90; azimuthSpeed > 10; azimuthSpeed -= 1 )
-	{
-		azimuthServo.writeMicroseconds( azimuthSpeed );
-		delay( 20 );
-	}
-	Serial.printf( "Servo at %d\n", azimuthSpeed );
-	delay( 3000 );
-	digitalWrite( MCU_LED, LOW );
-	Serial.printf( "LED is %d\n", digitalRead( MCU_LED ) );
-
-	// Ramp up from 0 to 90.
-	for( azimuthSpeed = 10; azimuthSpeed < 90; azimuthSpeed += 1 )
-	{
-		azimuthServo.writeMicroseconds( azimuthSpeed );
-		delay( 20 );
-	}
-	Serial.printf( "Servo at %d\n", azimuthSpeed );
-	delay( 3000 );
-} // End of azimuthDemo() function.
-
-
 void loop()
 {
 	ArduinoOTA.handle();

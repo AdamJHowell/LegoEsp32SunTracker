@@ -18,7 +18,7 @@ void setAltitude( int angle )
 	int pwmRange = maxPulseWidth - minPulseWidth;
 	// The constrained maximum range should be the minimum value plus 1/4 of the range.
 	int modifiedMaxPulseWidth = minPulseWidth + ( pwmRange / 4 );
-	// Map the angle to a pulse width.
+	// Map the angle to a pulse width.  Note that with 90 coming before 0, the servo is effectively reversed.
 	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );

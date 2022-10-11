@@ -7,14 +7,14 @@
 
 #ifdef ESP8266
 // These headers are installed when the ESP8266 is installed in board manager.
-#include "ESP8266WiFi.h" // ESP8266 WiFi support.  https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
+#include <ESP8266WiFi.h> // ESP8266 WiFi support.  https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
 #include <ESP8266mDNS.h> // OTA - mDNSResponder (Multicast DNS) for the ESP8266 family.
 #elif ESP32
 // These headers are installed when the ESP32 is installed in board manager.
-#include "WiFi.h"		// ESP32 Wifi support.  https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFi/src/WiFi.h
+#include <WiFi.h>		// ESP32 Wifi support.  https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFi/src/WiFi.h
 #include <ESPmDNS.h> // OTA - Multicast DNS for the ESP32.
 #else
-#include "WiFi.h" // Arduino Wifi support.  This header is part of the standard library.  https://www.arduino.cc/en/Reference/WiFi
+#include <WiFi.h> // Arduino Wifi support.  This header is part of the standard library.  https://www.arduino.cc/en/Reference/WiFi
 #endif
 #include <Arduino.h>		  // The built-in Arduino library.
 #include <WiFiUdp.h>		  // OTA
@@ -23,7 +23,7 @@
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
 #include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 //#include <WiFiClient.h>	  // Provides the WiFiClient class needed for MQTT.
-#include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
+#include "privateInfo.h" // I use this file to hide my network information from random people on GitHub.
 
 
 /**
@@ -53,21 +53,6 @@ Servo altitudeServo;						  // A Servo class object for controlling the altitude
 
 
 /**
- * Global servo parameters.
- * Depending on your servo make, the pulse width minimum and maximum may vary.
- * Adjust these to be as close to the mechanical limits of each servo, without hitting those actual limits.
- * For continuous rotation servos, use the declared minimum and maximum values from the specification sheet.
- * If unknown, 500 μsec is the most common minimum, and 2500 μsec is the most common maximum.
- */
-int azimuthServoPin = 23;	// The GPIO which the azimuth servo connects to.
-int azimuthSpeed = 0;		// Holds the current position of the azimuth servo.  The default of 1500 is motionless.
-int altitudeServoPin = 22; // The GPIO which the altitude servo connects to.
-int altitudePosition = 45; // Holds the current position of the azimuth servo.  The default of 90 is directly up.
-int minPulseWidth = 500;	// The minimum pulse width to use with servos.
-int maxPulseWidth = 2500;	// The maximum pulse width to use with servos.
-
-
-/**
  * Global Network constants.
  * If you do not use the privateInfo.h file to hold your network information, you will need to set these four consts to suit your needs.
  */
@@ -92,6 +77,21 @@ const char *rssiTopic = "sunTracker/rssi";					  // The topic used to publish th
 const char *publishCountTopic = "sunTracker/publishCount"; // The topic used to publish the loop count.
 const char *notesTopic = "sunTracker/notes";					  // The topic used to publish notes relevant to this project.
 const unsigned long JSON_DOC_SIZE = 512;						  // The ArduinoJson document size, and size of some buffers.
+
+
+/**
+ * Global servo variables.
+ * Depending on your servo make, the pulse width minimum and maximum may vary.
+ * Adjust these to be as close to the mechanical limits of each servo, without hitting those actual limits.
+ * For continuous rotation servos, use the declared minimum and maximum values from the specification sheet.
+ * If unknown, 500 μsec is the most common minimum, and 2500 μsec is the most common maximum.
+ */
+int azimuthServoPin = 23;	// The GPIO which the azimuth servo connects to.
+int azimuthSpeed = 0;		// Holds the current position of the azimuth servo.  The default of 1500 is motionless.
+int altitudeServoPin = 22; // The GPIO which the altitude servo connects to.
+int altitudePosition = 45; // Holds the current position of the azimuth servo.  The default of 90 is directly up.
+int minPulseWidth = 500;	// The minimum pulse width to use with servos.
+int maxPulseWidth = 2500;	// The maximum pulse width to use with servos.
 
 
 /**
