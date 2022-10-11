@@ -229,6 +229,8 @@ int mqttMultiConnect( int maxAttempts )
 	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
 	if( WiFi.status() != WL_CONNECTED )
 		wifiMultiConnect();
+	else
+		Serial.printf( "Wi-Fi is already connected with client address %s\n", ipAddress );
 
 	/*
 	 * The networkIndex variable is initialized to 2112.
