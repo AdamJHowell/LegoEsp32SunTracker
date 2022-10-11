@@ -355,11 +355,11 @@ void publishTelemetry()
 
 void printTelemetry()
 {
-	Serial.printf( "MAC address: %s", macAddress );
-	Serial.printf( "IP address: %s", ipAddress );
-	Serial.printf( "RSSI: %ld", rssi );
-	Serial.printf( "Host  name: %s", HOST_NAME );
-	Serial.printf( "Sketch file name: %s", __FILE__ );
-	Serial.printf( "Notes: %s", NOTES );
-	Serial.printf( "Publish count: %ld", publishCount );
+	Serial.printf( "MAC address: %s\n", macAddress );
+	Serial.printf( "IP address: %s\n", ipAddress );
+	Serial.printf( "RSSI: %ld\n", rssi );
+	Serial.printf( "Host  name: %s\n", HOST_NAME );
+	Serial.printf( "Sketch file name: %s\n", __FILE__ );
+	Serial.printf( "Notes: %s\n", NOTES );
+	Serial.printf( "Publish count: %ld\n", publishCount );
 }
