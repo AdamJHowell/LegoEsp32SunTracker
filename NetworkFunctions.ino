@@ -184,8 +184,6 @@ void wifiMultiConnect()
 			else
 				Serial.println( "Unable to connect to WiFi!" );
 		}
-		else
-			Serial.println( "That network was not found!" );
 	}
 	Serial.println( "Exiting wifiMultiConnect()\n" );
 } // End of wifiMultiConnect() function.
@@ -249,7 +247,8 @@ int mqttMultiConnect( int maxAttempts )
 	{
 		// Put the macAddress and random number into clientId.
 		char clientId[22];
-		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
+		//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
+		snprintf( clientId, 19, "%s", macAddress );
 		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
 		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
 		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );

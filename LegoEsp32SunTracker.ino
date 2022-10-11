@@ -6,7 +6,7 @@ void setup()
 	Serial.begin( 115200 );
 	if( !Serial )
 		delay( 500 );
-	Serial.println( "setup() is beginning." );
+	Serial.println( "\n\nsetup() is beginning." );
 
 	// Allocate all timers.
 	ESP32PWM::allocateTimer( 0 );
