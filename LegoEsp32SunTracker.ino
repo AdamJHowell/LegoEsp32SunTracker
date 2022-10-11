@@ -6,6 +6,7 @@ void setup()
 	Serial.begin( 115200 );
 	if( !Serial )
 		delay( 500 );
+	Serial.println( "setup() is beginning." );
 
 	// Allocate all timers.
 	ESP32PWM::allocateTimer( 0 );
@@ -33,7 +34,7 @@ void setup()
 	wifiMultiConnect();
 	configureOTA();
 
-	azimuthSpeed = 50;
+	Serial.println( "setup() has finished." );
 } // End of setup() function.
 
 
@@ -90,7 +91,7 @@ void loop()
 {
 	ArduinoOTA.handle();
 	if( !mqttClient.connected() )
-		mqttMultiConnect( 5 );
+		mqttMultiConnect( 3 );
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
@@ -100,8 +101,12 @@ void loop()
 		readTelemetry();
 		printTelemetry();
 		lastTelemetryPollTime = millis();
-		azimuthSpeed = -azimuthSpeed;
-		setAzimuthSpeed( azimuthSpeed );
+
+		if( altitudePosition < 90 )
+			altitudePosition += 45;
+		else
+			altitudePosition = 0;
+		setAltitude( altitudePosition );
 	}
 
 	time = millis();
@@ -109,10 +114,11 @@ void loop()
 	{
 		publishTelemetry();
 		lastPublishTime = millis();
-		if( altitudePosition < 90 )
-			altitudePosition += 45;
+
+		if( azimuthSpeed >= 10 )
+			azimuthSpeed = -10;
 		else
-			altitudePosition = 0;
-		setAltitude( altitudePosition );
+			azimuthSpeed += 10;
+		setAzimuthSpeed( azimuthSpeed );
 	}
 } // End of loop() function.

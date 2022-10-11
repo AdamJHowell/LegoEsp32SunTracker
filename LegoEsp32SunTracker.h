@@ -17,13 +17,13 @@
 #include "WiFi.h" // Arduino Wifi support.  This header is part of the standard library.  https://www.arduino.cc/en/Reference/WiFi
 #endif
 #include <Arduino.h>		  // The built-in Arduino library.
-#include <ESP32Servo.h>	  // The servo library to use.
-#include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
 #include <WiFiUdp.h>		  // OTA
 #include <ArduinoOTA.h>	  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
+#include <ESP32Servo.h>	  // The servo library to use.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
 #include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
-#include <WiFiClient.h>	  // Provides the WiFiClient class needed for MQTT.
+//#include <WiFiClient.h>	  // Provides the WiFiClient class needed for MQTT.
+#include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
 
 
 /**

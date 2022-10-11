@@ -329,7 +329,6 @@ void publishStats()
 
 	Serial.printf( "Publishing stats to the '%s' topic.\n", MQTT_STATS_TOPIC );
 
-	rssi = WiFi.RSSI();
 	if( mqttClient.connected() )
 	{
 		if( mqttClient.connected() && mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
@@ -345,6 +344,7 @@ void publishStats()
 
 void readTelemetry()
 {
+	rssi = WiFi.RSSI();
 }
 
 
@@ -355,4 +355,11 @@ void publishTelemetry()
 
 void printTelemetry()
 {
+	Serial.print( "MAC address: %s", macAddress );
+	Serial.print( "IP address: %s", ipAddress );
+	Serial.print( "RSSI: %l", rssi );
+	Serial.print( "Host  name: %s", HOST_NAME );
+	Serial.print( "Sketch file name: %s", __FILE__ );
+	Serial.print( "Notes: %s", NOTES );
+	Serial.print( "Publish count: %l", publishCount );
 }

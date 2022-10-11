@@ -19,13 +19,16 @@ void setAltitude( int angle )
 	// The constrained maximum range should be the minimum value plus 1/4 of the range.
 	int modifiedMaxPulseWidth = minPulseWidth + ( pwmRange / 4 );
 	// Map the angle to a pulse width.
-	int pulseWidth = map( angle, 0, 90, minPulseWidth, modifiedMaxPulseWidth );
+	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );
 	Serial.printf( "Altitude position: %d\n", altitudePosition );
 }
 
-
+/**
+ * @brief The azimuth servo is a continuous-rotation servo.
+ * @param speed the speed to set the servo to.
+ */
 void setAzimuthSpeed( int speed )
 {
 	// Enforce constraints.
