@@ -33,10 +33,22 @@ void setup()
 
 #ifdef AJH_MULTI_CONNECT
 	wifiMultiConnect();
+	const char *mqttBroker = mqttBrokerArray[networkIndex];
+	const int mqttPort = mqttPortArray[networkIndex];
 #else
 	wifiConnect();
 #endif
-//	configureOTA();
+
+	// Set the MQTT client parameters.
+	mqttClient.setServer( mqttBroker, mqttPort );
+	// Assign the onReceiveCallback() function to handle MQTT callbacks.
+	mqttClient.setCallback( onReceiveCallback );
+	Serial.print( "Using MQTT broker: " );
+	Serial.println( mqttBroker );
+	Serial.print( "Using MQTT port: " );
+	Serial.println( mqttPort );
+
+	configureOTA();
 
 	Serial.println( "setup() has finished." );
 } // End of setup() function.
@@ -44,13 +56,13 @@ void setup()
 
 void loop()
 {
-//	ArduinoOTA.handle();
+	//	ArduinoOTA.handle();
 	if( !mqttClient.connected() )
 	{
 #ifdef AJH_MULTI_CONNECT
 		mqttMultiConnect( 3 );
 #else
-		mqttConnect();
+		mqttConnect( 3 );
 #endif
 	}
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.

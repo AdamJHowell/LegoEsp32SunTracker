@@ -44,7 +44,7 @@ void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.
 void publishTelemetry();
 void wifiConnect();
-int mqttConnect();
+int mqttConnect( int maxAttempts );
 
 
 /**

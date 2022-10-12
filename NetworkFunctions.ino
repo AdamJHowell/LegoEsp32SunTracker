@@ -124,155 +124,42 @@ void configureOTA()
 } // End of the configureOTA() function.
 
 
-void wifiConnect()
+/*
+ * checkForSSID() is used by wifiMultiConnect() to avoid attempting to connect to SSIDs which are not in range.
+ * Returns 1 if 'ssidName' can be found.
+ * Returns 0 if 'ssidName' cannot be found.
+ */
+int checkForSSID( const char *ssidName )
 {
-	digitalWrite( MCU_LED, LOW );
-
-	Serial.println( "\nEntering wifiConnect()" );
-
-	// Announce the Wi-Fi parameters for this connection attempt.
-	Serial.printf( "Attempting to connect to SSID '%s'.\n", wifiSsid );
-
-	// Don't even try to connect if the SSID cannot be found.
-	if( checkForSSID( wifiSsid ) )
-	{
-		// Set the Wi-Fi mode to station.
-		Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
-		if( WiFi.setHostname( HOST_NAME ) )
-			Serial.printf( "Network hostname set to '%s'\n", HOST_NAME );
-		else
-			Serial.printf( "Failed to set the network hostname to '%s'\n", HOST_NAME );
-		WiFi.begin( wifiSsid, wifiPassword );
-
-		unsigned long wifiConnectionStartTime = millis();
-		Serial.printf( "Waiting up to %u seconds for a connection.\n", wifiConnectionTimeout / 1000 );
-		/*
-			WiFi.status() return values:
-			WL_IDLE_STATUS      = 0,
-			WL_NO_SSID_AVAIL    = 1,
-			WL_SCAN_COMPLETED   = 2,
-			WL_CONNECTED        = 3,
-			WL_CONNECT_FAILED   = 4,
-			WL_CONNECTION_LOST  = 5,
-			WL_WRONG_PASSWORD   = 6,
-			WL_DISCONNECTED     = 7
-			*/
-		while( WiFi.status() != WL_CONNECTED && ( millis() - wifiConnectionStartTime < wifiConnectionTimeout ) )
-		{
-			Serial.print( "." );
-			delay( 1000 );
-		}
-		Serial.println( "" );
-
-		if( WiFi.status() == WL_CONNECTED )
-		{
-			// Set the global 'networkIndex' to the index which successfully connected.
-			networkIndex = networkArrayIndex;
-			// Print that Wi-Fi has connected.
-			Serial.println( "\nWiFi connection established!" );
-			snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
-			Serial.printf( "IP address: %s\n", ipAddress );
-			digitalWrite( MCU_LED, HIGH );
-			return;
-		}
-		else
-			Serial.println( "Unable to connect to WiFi!" );
-	}
-	Serial.println( "Exiting wifiMultiConnect()\n" );
-}
-
-
-int mqttConnect( int maxAttempts )
-{
-	digitalWrite( MCU_LED, LOW );
-
-	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
-	if( WiFi.status() != WL_CONNECTED )
-		wifiConnect();
+	byte networkCount = WiFi.scanNetworks();
+	if( networkCount == 0 )
+		Serial.println( "No WiFi SSIDs are in range!" );
 	else
-		Serial.printf( "Wi-Fi is already connected with client address %s\n", ipAddress );
-
-	Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBroker, mqttPort, maxAttempts );
-
-	int attemptNumber = 0;
-	// Loop until MQTT has connected.
-	while( !mqttClient.connected() && attemptNumber < maxAttempts )
 	{
-		// Put the macAddress and random number into clientId.
-		char clientId[22];
-		//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
-		snprintf( clientId, 19, "%s", macAddress );
-		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
-		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
-		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
-		if( mqttClient.connect( clientId ) )
+		Serial.printf( "%d networks found.\n", networkCount );
+		for( int i = 0; i < networkCount; ++i )
 		{
-			Serial.println( " connected." );
-			digitalWrite( MCU_LED, HIGH );
-			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
-			{
-				Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
-				Serial.println( "Restarting the device!" );
-				ESP.restart();
-			}
-			publishStats();
-			// Subscribe to the command topic.
-			if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
-				Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
-			else
-				Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
+			// Check to see if this SSID matches the parameter.
+			if( strcmp( ssidName, WiFi.SSID( i ).c_str() ) == 0 )
+				return 1;
+			// Alternately, the String compareTo() function can be used like this: if( WiFi.SSID( i ).compareTo( ssidName ) == 0 )
 		}
-		else
-		{
-			int mqttState = mqttClient.state();
-			/*
-				Possible values for client.state():
-				MQTT_CONNECTION_TIMEOUT     -4		// Note: This also comes up when the clientID is already in use.
-				MQTT_CONNECTION_LOST        -3
-				MQTT_CONNECT_FAILED         -2
-				MQTT_DISCONNECTED           -1
-				MQTT_CONNECTED               0
-				MQTT_CONNECT_BAD_PROTOCOL    1
-				MQTT_CONNECT_BAD_CLIENT_ID   2
-				MQTT_CONNECT_UNAVAILABLE     3
-				MQTT_CONNECT_BAD_CREDENTIALS 4
-				MQTT_CONNECT_UNAUTHORIZED    5
-			*/
-			Serial.printf( " failed!  Return code: %d\n", mqttState );
-			if( mqttState == -4 )
-				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
-			else if( mqttState == 2 )
-				Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
-			else
-				Serial.println( "" );
-
-			Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
-			delay( mqttReconnectInterval );
-		}
-		attemptNumber++;
 	}
-
-	if( !mqttClient.connected() )
-	{
-		Serial.println( "Unable to connect to the MQTT broker!" );
-		return 0;
-	}
-
-	Serial.println( "Function mqttMultiConnect() has completed.\n" );
-	return 1;
-}
+	Serial.printf( "SSID '%s' was not found!\n", ssidName );
+	return 0;
+} // End of checkForSSID() function.
 
 
+#ifdef AJH_MULTI_CONNECT
 /*
  * wifiMultiConnect() will iterate through 'wifiSsidArray[]', attempting to connect with the password stored at the same index in 'wifiPassArray[]'.
- *
  */
 void wifiMultiConnect()
 {
 	digitalWrite( MCU_LED, LOW );
 
 	Serial.println( "\nEntering wifiMultiConnect()" );
-	for( size_t networkArrayIndex = 0; networkArrayIndex < sizeof( wifiSsidArray ); networkArrayIndex++ )
+	for( size_t networkArrayIndex = 0; networkArrayIndex < ELEMENT_COUNT; networkArrayIndex++ )
 	{
 		// Get the details for this connection attempt.
 		const char *wifiSsid = wifiSsidArray[networkArrayIndex];
@@ -326,35 +213,11 @@ void wifiMultiConnect()
 			else
 				Serial.println( "Unable to connect to WiFi!" );
 		}
+		else
+			Serial.println( "checkForSSID() was unable to find the network!" );
 	}
 	Serial.println( "Exiting wifiMultiConnect()\n" );
 } // End of wifiMultiConnect() function.
-
-
-/*
- * checkForSSID() is used by wifiMultiConnect() to avoid attempting to connect to SSIDs which are not in range.
- * Returns 1 if 'ssidName' can be found.
- * Returns 0 if 'ssidName' cannot be found.
- */
-int checkForSSID( const char *ssidName )
-{
-	byte networkCount = WiFi.scanNetworks();
-	if( networkCount == 0 )
-		Serial.println( "No WiFi SSIDs are in range!" );
-	else
-	{
-		Serial.printf( "%d networks found.\n", networkCount );
-		for( int i = 0; i < networkCount; ++i )
-		{
-			// Check to see if this SSID matches the parameter.
-			if( strcmp( ssidName, WiFi.SSID( i ).c_str() ) == 0 )
-				return 1;
-			// Alternately, the String compareTo() function can be used like this: if( WiFi.SSID( i ).compareTo( ssidName ) == 0 )
-		}
-	}
-	Serial.printf( "SSID '%s' was not found!\n", ssidName );
-	return 0;
-} // End of checkForSSID() function.
 
 
 /*
@@ -452,6 +315,149 @@ int mqttMultiConnect( int maxAttempts )
 	Serial.println( "Function mqttMultiConnect() has completed.\n" );
 	return 1;
 } // End of mqttMultiConnect() function.
+
+#else
+void wifiConnect()
+{
+	digitalWrite( MCU_LED, LOW );
+
+	Serial.println( "\nEntering wifiConnect()" );
+
+	// Announce the Wi-Fi parameters for this connection attempt.
+	Serial.printf( "Attempting to connect to SSID '%s'.\n", wifiSsid );
+
+	// Don't even try to connect if the SSID cannot be found.
+	if( checkForSSID( wifiSsid ) )
+	{
+		Serial.printf( "Found %s\n", wifiSsid );
+	}
+	else
+	{
+		Serial.printf( "Could not find %s\n", wifiSsid );
+	}
+	// Set the Wi-Fi mode to station.
+	Serial.printf( "Wi-Fi mode set to WIFI_STA %s\n", WiFi.mode( WIFI_STA ) ? "" : "Failed!" );
+	if( WiFi.setHostname( HOST_NAME ) )
+		Serial.printf( "Network hostname set to '%s'\n", HOST_NAME );
+	else
+		Serial.printf( "Failed to set the network hostname to '%s'\n", HOST_NAME );
+	WiFi.begin( wifiSsid, wifiPassword );
+
+	unsigned long wifiConnectionStartTime = millis();
+	Serial.printf( "Waiting up to %u seconds for a connection.\n", wifiConnectionTimeout / 1000 );
+	/*
+			WiFi.status() return values:
+			WL_IDLE_STATUS      = 0,
+			WL_NO_SSID_AVAIL    = 1,
+			WL_SCAN_COMPLETED   = 2,
+			WL_CONNECTED        = 3,
+			WL_CONNECT_FAILED   = 4,
+			WL_CONNECTION_LOST  = 5,
+			WL_WRONG_PASSWORD   = 6,
+			WL_DISCONNECTED     = 7
+			*/
+	while( WiFi.status() != WL_CONNECTED && ( millis() - wifiConnectionStartTime < wifiConnectionTimeout ) )
+	{
+		Serial.print( "." );
+		delay( 1000 );
+	}
+	Serial.println( "" );
+
+	if( WiFi.status() == WL_CONNECTED )
+	{
+		// Set the global 'networkIndex' to the index which successfully connected.
+		//			networkIndex = networkArrayIndex;
+		// Print that Wi-Fi has connected.
+		Serial.println( "\nWiFi connection established!" );
+		snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
+		Serial.printf( "IP address: %s\n", ipAddress );
+		digitalWrite( MCU_LED, HIGH );
+		return;
+	}
+	Serial.println( "Exiting wifiMultiConnect()\n" );
+} // End of wifiConnect() function.
+
+
+int mqttConnect( int maxAttempts )
+{
+	digitalWrite( MCU_LED, LOW );
+
+	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
+	if( WiFi.status() != WL_CONNECTED )
+		wifiConnect();
+	else
+		Serial.printf( "Wi-Fi is already connected with client address %s\n", ipAddress );
+
+	Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBroker, mqttPort, maxAttempts );
+
+	int attemptNumber = 0;
+	// Loop until MQTT has connected.
+	while( !mqttClient.connected() && attemptNumber < maxAttempts )
+	{
+		// Put the macAddress and random number into clientId.
+		char clientId[22];
+		//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
+		snprintf( clientId, 19, "%s", macAddress );
+		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
+		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
+		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
+		if( mqttClient.connect( clientId ) )
+		{
+			Serial.println( " connected." );
+			digitalWrite( MCU_LED, HIGH );
+			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
+			{
+				Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
+				Serial.println( "Restarting the device!" );
+				ESP.restart();
+			}
+			publishStats();
+			// Subscribe to the command topic.
+			if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
+				Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
+			else
+				Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
+		}
+		else
+		{
+			int mqttState = mqttClient.state();
+			/*
+				Possible values for client.state():
+				MQTT_CONNECTION_TIMEOUT     -4		// Note: This also comes up when the clientID is already in use.
+				MQTT_CONNECTION_LOST        -3
+				MQTT_CONNECT_FAILED         -2
+				MQTT_DISCONNECTED           -1
+				MQTT_CONNECTED               0
+				MQTT_CONNECT_BAD_PROTOCOL    1
+				MQTT_CONNECT_BAD_CLIENT_ID   2
+				MQTT_CONNECT_UNAVAILABLE     3
+				MQTT_CONNECT_BAD_CREDENTIALS 4
+				MQTT_CONNECT_UNAUTHORIZED    5
+			*/
+			Serial.printf( " failed!  Return code: %d\n", mqttState );
+			if( mqttState == -4 )
+				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
+			else if( mqttState == 2 )
+				Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
+			else
+				Serial.println( "" );
+
+			Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
+			delay( mqttReconnectInterval );
+		}
+		attemptNumber++;
+	}
+
+	if( !mqttClient.connected() )
+	{
+		Serial.println( "Unable to connect to the MQTT broker!" );
+		return 0;
+	}
+
+	Serial.println( "Function mqttMultiConnect() has completed.\n" );
+	return 1;
+} // End of mqttConnect() function.
+#endif
 
 
 /*
