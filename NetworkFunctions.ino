@@ -182,13 +182,13 @@ void wifiConnect()
 }
 
 
-int mqttConnect()
+int mqttConnect( int maxAttempts )
 {
 	digitalWrite( MCU_LED, LOW );
 
 	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
 	if( WiFi.status() != WL_CONNECTED )
-		wifiMultiConnect();
+		wifiConnect();
 	else
 		Serial.printf( "Wi-Fi is already connected with client address %s\n", ipAddress );
 
