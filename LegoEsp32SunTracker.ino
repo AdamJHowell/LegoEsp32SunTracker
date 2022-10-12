@@ -31,8 +31,12 @@ void setup()
 	// Set the MAC address variable to its value.
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
 
+#ifdef AJH_MULTI_CONNECT
 	wifiMultiConnect();
-	configureOTA();
+#else
+	wifiConnect();
+#endif
+//	configureOTA();
 
 	Serial.println( "setup() has finished." );
 } // End of setup() function.
@@ -40,9 +44,15 @@ void setup()
 
 void loop()
 {
-	ArduinoOTA.handle();
+//	ArduinoOTA.handle();
 	if( !mqttClient.connected() )
+	{
+#ifdef AJH_MULTI_CONNECT
 		mqttMultiConnect( 3 );
+#else
+		mqttConnect();
+#endif
+	}
 	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 

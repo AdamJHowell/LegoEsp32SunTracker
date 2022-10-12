@@ -5,6 +5,8 @@
 #ifndef LEGO_ESP32_SUN_TRACKER_H
 #define LEGO_ESP32_SUN_TRACKER_H
 
+#define AJH_MULTI_CONNECT
+
 #ifdef ESP8266
 // These headers are installed when the ESP8266 is installed in board manager.
 #include <ESP8266WiFi.h> // ESP8266 WiFi support.  https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
@@ -41,6 +43,8 @@ void publishStats();
 void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.
 void publishTelemetry();
+void wifiConnect();
+int mqttConnect();
 
 
 /**
