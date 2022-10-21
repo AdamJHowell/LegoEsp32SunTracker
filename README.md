@@ -72,18 +72,20 @@ Every test at temperature: 25 ±5° C and relative humidity: 65 ±10％.
 
 ## MQTT messages
 
-Move servo example:
-{
-"command":   "moveServo",
-"servoName": "altitude",
-"value":     42
-}
+Move servo examples:
 
-{
-"command":   "moveServo",
-"servoName": "azimuth",
-"value":     -42
-}
+    {
+    	"command":   "moveServo",
+    	"servoName": "altitude",
+    	"value":     42
+    }
+
+
+    {
+    	"command":   "moveServo",
+    	"servoName": "azimuth",
+    	"value":     -42
+    }
 
 Valid "servoName" values are "azimuth" and "altitude".
 For altitude, value will be an integer angle from 0 to 90. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent interference with other structures.
