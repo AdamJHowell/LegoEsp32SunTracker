@@ -15,6 +15,17 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 {
 	Serial.printf( "New message on topic '%s'\n", topic );
 	// ToDo: Determine which commands this device should respond to.
+	//{
+	//"command":   "moveServo",
+	//"servoName": "altitude",
+	//"value":     42
+	//}
+	//
+	//{
+	//"command":   "moveServo",
+	//"servoName": "azimuth",
+	//"value":     -42
+	//}
 	// void moveServo( Servo servoToMove, int pwm );
 	// digitalWrite( MCU_LED, HIGH );
 	if( length > 0 )
@@ -33,7 +44,34 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 			// Available commands are: moveServo and publishStats.
 			if( strcmp( command, "moveServo" ) == 0 )
 			{
-				Serial.println( "TakePicture command processed." );
+				if( callbackJsonDoc.containsKey( "servoName" ) )
+				{
+					const char *servoName = callbackJsonDoc["servoName"];
+					if( strcmp( servoName, "azimuth" ) == 0 )
+					{
+						if( callbackJsonDoc.containsKey( "value" ) )
+						{
+							azimuthSpeed = callbackJsonDoc["value"];
+							setAzimuthSpeed( azimuthSpeed );
+						}
+						else
+							Serial.printf( "The 'moveServo' command requires the 'value' property to be set!" );
+					}
+					else if( strcmp( servoName, "altitude" ) == 0 )
+					{
+						if( callbackJsonDoc.containsKey( "value" ) )
+						{
+							altitudePosition = callbackJsonDoc["value"];
+							setAltitude( altitudePosition );
+						}
+						else
+							Serial.printf( "The 'moveServo' command requires the 'value' property to be set!" );
+					}
+					else
+						Serial.printf( "Unknown servo name '%s'\n", servoName );
+				}
+				else
+					Serial.printf( "The 'moveServo' command requires the 'servoName' property to be set!" );
 			}
 			else if( strcmp( command, "publishStats" ) == 0 )
 				publishStats();
@@ -514,4 +552,6 @@ void printTelemetry()
 	Serial.printf( "Sketch file name: %s\n", __FILE__ );
 	Serial.printf( "Notes: %s\n", NOTES );
 	Serial.printf( "Publish count: %ld\n", publishCount );
+	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
+	Serial.printf( "Altitude servo position: %d\n", altitudePosition );
 }

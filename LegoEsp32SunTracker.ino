@@ -54,15 +54,12 @@ void setup()
 } // End of setup() function.
 
 
-void queue()
-{
-
-}
-
-
 void loop()
 {
-	//	ArduinoOTA.handle();
+	// Process OTA requests.
+	ArduinoOTA.handle();
+
+	//	Check the MQTT connection, and reconnect if needed.
 	if( !mqttClient.connected() )
 	{
 #ifdef AJH_MULTI_CONNECT
@@ -71,7 +68,7 @@ void loop()
 		mqttConnect( 3 );
 #endif
 	}
-	// The loop() function facilitates the receiving of messages and maintains the connection to the broker.
+	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
 	unsigned long time = millis();

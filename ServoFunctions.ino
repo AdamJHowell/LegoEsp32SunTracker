@@ -25,6 +25,7 @@ void setAltitude( int angle )
 	Serial.printf( "Altitude position: %d\n", altitudePosition );
 }
 
+
 /**
  * @brief The azimuth servo is a continuous-rotation servo.
  * @param speed the speed to set the servo to.

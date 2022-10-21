@@ -76,9 +76,15 @@ Move servo example:
 {
 "command":   "moveServo",
 "servoName": "altitude",
-"value":     20
+"value":     42
+}
+
+{
+"command":   "moveServo",
+"servoName": "azimuth",
+"value":     -42
 }
 
 Valid "servoName" values are "azimuth" and "altitude".
-For altitude, value will be an integer angle from 0 to 90. The servo is capable of rotation between 0° and 360°, but this is being constrained to prevent interference with other structures.
+For altitude, value will be an integer angle from 0 to 90. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent interference with other structures.
 For azimuth, value will be an integer speed from -100 to 100. Values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above.
