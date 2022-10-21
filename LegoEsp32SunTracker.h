@@ -18,8 +18,7 @@
 #else
 #include <WiFi.h> // Arduino Wifi support.  This header is part of the standard library.  https://www.arduino.cc/en/Reference/WiFi
 #endif
-#include <Arduino.h>		  // The built-in Arduino library.
-#include <WiFiUdp.h>		  // OTA
+#include <WiFiUdp.h>		  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
 #include <ArduinoOTA.h>	  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
 #include <ESP32Servo.h>	  // The servo library to use.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
