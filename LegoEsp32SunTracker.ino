@@ -31,14 +31,6 @@ void setup()
 	// Set the MAC address variable to its value.
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
 
-#ifdef AJH_MULTI_CONNECT
-	wifiMultiConnect();
-	const char *mqttBroker = mqttBrokerArray[networkIndex];
-	const int mqttPort = mqttPortArray[networkIndex];
-#else
-	wifiConnect();
-#endif
-
 	// Set the MQTT client parameters.
 	mqttClient.setServer( mqttBroker, mqttPort );
 	// Assign the onReceiveCallback() function to handle MQTT callbacks.
@@ -47,6 +39,14 @@ void setup()
 	Serial.println( mqttBroker );
 	Serial.print( "Using MQTT port: " );
 	Serial.println( mqttPort );
+
+#ifdef AJH_MULTI_CONNECT
+	wifiMultiConnect();
+	const char *mqttBroker = mqttBrokerArray[networkIndex];
+	const int mqttPort = mqttPortArray[networkIndex];
+#else
+	wifiConnect();
+#endif
 
 	configureOTA();
 
