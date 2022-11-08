@@ -22,7 +22,7 @@ void setAltitude( int angle )
 	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );
-	Serial.printf( "Altitude position: %d\n", altitudePosition );
+	Serial.printf( "Altitude position: %d\n\n", altitudePosition );
 }
 
 
@@ -41,5 +41,31 @@ void setAzimuthSpeed( int speed )
 	int pulseWidth = map( speed, -100, 100, minPulseWidth, maxPulseWidth );
 	// Set the servo to the resulting value.
 	azimuthServo.writeMicroseconds( pulseWidth );
-	Serial.printf( "Azimuth speed: %d, adjusted speed: %d\n", speed, pulseWidth );
+	Serial.printf( "Azimuth speed: %d, adjusted speed: %d\n\n", speed, pulseWidth );
+}
+
+
+/**
+ * @brief A simple function that demonstrates movement on the altitude axis.
+ */
+void altitudeDemo()
+{
+	if( altitudePosition < 90 )
+		altitudePosition += 45;
+	else
+		altitudePosition = 0;
+	setAltitude( altitudePosition );
+}
+
+
+/**
+ * @brief A simple function that demonstrates movement on the azimuth axis.
+ */
+void azimuthDemo()
+{
+	if( azimuthSpeed >= 15 )
+		azimuthSpeed = -15;
+	else
+		azimuthSpeed += 15;
+	setAzimuthSpeed( azimuthSpeed );
 }

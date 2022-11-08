@@ -5,8 +5,6 @@
 #ifndef LEGO_ESP32_SUN_TRACKER_H
 #define LEGO_ESP32_SUN_TRACKER_H
 
-#define AJH_MULTI_CONNECT
-
 #ifdef ESP8266
 // These headers are installed when the ESP8266 is installed in board manager.
 #include <ESP8266WiFi.h> // ESP8266 WiFi support.  https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
@@ -23,7 +21,6 @@
 #include <ESP32Servo.h>	  // The servo library to use.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
 #include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
-//#include <WiFiClient.h>	  // Provides the WiFiClient class needed for MQTT.
 #include "privateInfo.h" // I use this file to hide my network information from random people on GitHub.
 
 
@@ -37,13 +34,13 @@ int checkForSSID( const char *ssidName );
 int mqttMultiConnect( int maxAttempts );
 void setAltitude( int angle );
 void setAzimuthSpeed( int speed );
+void altitudeDemo();
 void azimuthDemo();
+void lookupWifiCode( int code, char *buffer );
 void publishStats();
 void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.
 void publishTelemetry();
-void wifiConnect();
-int mqttConnect( int maxAttempts );
 
 
 /**
@@ -51,8 +48,8 @@ int mqttConnect( int maxAttempts );
  */
 struct WiFiClient espClient;			  // Create a WiFiClient to connect to the local network.
 PubSubClient mqttClient( espClient ); // Create a PubSub MQTT client object that uses the WiFiClient.
-Servo azimuthServo;						  // A Servo class object for controlling the azimuth direction and speed.
 Servo altitudeServo;						  // A Servo class object for controlling the altitude position.
+Servo azimuthServo;						  // A Servo class object for controlling the azimuth direction and speed.
 
 
 /**

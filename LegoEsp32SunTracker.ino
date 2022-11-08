@@ -1,11 +1,17 @@
+/**
+ * LegoEsp32SunTracker is a simple sun tracker built with an ESP32 and Lego Technic components.
+ * See README.md for details.
+ */
 #include "LegoEsp32SunTracker.h"
+
 
 void setup()
 {
+	delay( 1000 );
 	// Start the Serial communication to send messages to the computer.
 	Serial.begin( 115200 );
 	if( !Serial )
-		delay( 500 );
+		delay( 1000 );
 	Serial.println( "\n\nsetup() is beginning." );
 
 	// Allocate all timers.
@@ -31,26 +37,20 @@ void setup()
 	// Set the MAC address variable to its value.
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
 
+	wifiMultiConnect();
+	const char *mqttBroker = mqttBrokerArray[networkIndex];
+	const int mqttPort = mqttPortArray[networkIndex];
+
 	// Set the MQTT client parameters.
 	mqttClient.setServer( mqttBroker, mqttPort );
 	// Assign the onReceiveCallback() function to handle MQTT callbacks.
 	mqttClient.setCallback( onReceiveCallback );
-	Serial.print( "Using MQTT broker: " );
-	Serial.println( mqttBroker );
-	Serial.print( "Using MQTT port: " );
-	Serial.println( mqttPort );
-
-#ifdef AJH_MULTI_CONNECT
-	wifiMultiConnect();
-	const char *mqttBroker = mqttBrokerArray[networkIndex];
-	const int mqttPort = mqttPortArray[networkIndex];
-#else
-	wifiConnect();
-#endif
+	Serial.printf( "Using MQTT broker: %s\n", mqttBroker );
+	Serial.printf( "Using MQTT port: %d\n", mqttPort );
 
 	configureOTA();
 
-	Serial.println( "setup() has finished." );
+	Serial.println( "setup() has finished.\n" );
 } // End of setup() function.
 
 
@@ -61,13 +61,7 @@ void loop()
 
 	//	Check the MQTT connection, and reconnect if needed.
 	if( !mqttClient.connected() )
-	{
-#ifdef AJH_MULTI_CONNECT
 		mqttMultiConnect( 3 );
-#else
-		mqttConnect( 3 );
-#endif
-	}
 	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
@@ -77,12 +71,6 @@ void loop()
 		readTelemetry();
 		printTelemetry();
 		lastTelemetryPollTime = millis();
-
-		if( altitudePosition < 90 )
-			altitudePosition += 45;
-		else
-			altitudePosition = 0;
-		setAltitude( altitudePosition );
 	}
 
 	time = millis();
@@ -90,11 +78,5 @@ void loop()
 	{
 		publishTelemetry();
 		lastPublishTime = millis();
-
-		if( azimuthSpeed >= 10 )
-			azimuthSpeed = -10;
-		else
-			azimuthSpeed += 10;
-		setAzimuthSpeed( azimuthSpeed );
 	}
 } // End of loop() function.

@@ -88,5 +88,5 @@ Move servo examples:
     }
 
 Valid "servoName" values are "azimuth" and "altitude".
-For altitude, value will be an integer angle from 0 to 90. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent interference with other structures.
-For azimuth, value will be an integer speed from -100 to 100. Values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above.
+For altitude, valid values are integers from 0 to 90, where those values represent the angle. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent mechanical interference with other structures.  If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.
+For azimuth, valid values are integers from -100 to 100, where those values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above.  If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.
