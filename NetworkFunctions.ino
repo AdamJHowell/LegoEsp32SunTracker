@@ -565,11 +565,13 @@ void printTelemetry()
 		{
 			Serial.println( "Move up!" );
 			altitudePosition++;
+			altitudePosition = constrain( altitudePosition, 0, 90 );
 		}
 		else
 		{
 			Serial.println( "Move down!" );
 			altitudePosition--;
+			altitudePosition = constrain( altitudePosition, 0, 90 );
 		}
 		setAltitude( altitudePosition );
 	}
