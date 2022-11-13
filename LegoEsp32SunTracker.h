@@ -81,7 +81,7 @@ const int upperLeft = 36;
 const int upperRight = 39;
 const int lowerLeft = 34;
 const int lowerRight = 35;
-int UpperLeftValue = 0;
+int upperLeftValue = 0;
 int upperRightValue = 0;
 int lowerLeftValue = 0;
 int lowerRightValue = 0;
@@ -111,7 +111,7 @@ long rssi;											  // A global to hold the Received Signal Strength Indicato
 unsigned int networkIndex = 2112;			  // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
 unsigned int wifiConnectionTimeout = 10000; // Set the Wi-Fi connection timeout to 10 seconds.
 unsigned int mqttReconnectInterval = 3000;  // Set the delay between MQTT broker connection attempts to 3 seconds.
-unsigned int telemetryPollInterval = 100;	  // How long to wait between sensor polling.
+unsigned int telemetryPollInterval = 1000;	  // How long to wait between sensor polling.
 unsigned int publishInterval = 60000;		  // How long to wait between MQTT publishes.
 unsigned int callbackCount = 0;				  // The number of times a callback was received.
 unsigned int MCU_LED = 2;						  // The GPIO which the onboard LED is connected to.

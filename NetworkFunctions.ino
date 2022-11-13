@@ -248,7 +248,11 @@ void wifiMultiConnect()
 				return;
 			}
 			else
+			{
 				Serial.println( "Unable to connect to WiFi!" );
+				// Set networkIndex back to its uninitialized value;
+				networkIndex = 2112;
+			}
 		}
 		else
 			Serial.println( "checkForSSID() was unable to find the network!" );
@@ -280,44 +284,52 @@ int mqttMultiConnect( int maxAttempts )
 	 * This is only needed to display the name and port of the broker being used.
 	 */
 	if( networkIndex != 2112 )
-		Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], maxAttempts );
-	else
-		Serial.printf( "Attempting to connect to the MQTT broker up to %d times.\n", maxAttempts );
-
-
-	int attemptNumber = 0;
-	// Loop until MQTT has connected.
-	while( !mqttClient.connected() && attemptNumber < maxAttempts )
 	{
-		// Put the macAddress and random number into clientId.
-		char clientId[22];
-		//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
-		snprintf( clientId, 19, "%s", macAddress );
-		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
-		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
-		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
-		// Connect with the client ID and a "clean" (non-persistent) session.
-		if( mqttClient.connect( clientId ) )
+		const char *mqttBroker = mqttBrokerArray[networkIndex];
+		const int mqttPort = mqttPortArray[networkIndex];
+		Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBroker, mqttPort, maxAttempts );
+
+		// Set the MQTT client parameters.
+		mqttClient.setServer( mqttBroker, mqttPort );
+		// Assign the onReceiveCallback() function to handle MQTT callbacks.
+		mqttClient.setCallback( onReceiveCallback );
+		Serial.printf( "Using MQTT broker: %s\n", mqttBroker );
+		Serial.printf( "Using MQTT port: %d\n", mqttPort );
+
+
+		int attemptNumber = 0;
+		// Loop until MQTT has connected.
+		while( !mqttClient.connected() && attemptNumber < maxAttempts )
 		{
-			Serial.println( " connected." );
-			digitalWrite( MCU_LED, HIGH );
-			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
+			// Put the macAddress and random number into clientId.
+			char clientId[22];
+			//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
+			snprintf( clientId, 19, "%s", macAddress );
+			// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
+			Serial.printf( "Connecting with client ID '%s'.\n", clientId );
+			Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
+			// Connect with the client ID and a "clean" (non-persistent) session.
+			if( mqttClient.connect( clientId ) )
 			{
-				Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
-				Serial.println( "Restarting the device!" );
-				ESP.restart();
+				Serial.println( " connected." );
+				digitalWrite( MCU_LED, HIGH );
+				if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
+				{
+					Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
+					Serial.println( "Restarting the device!" );
+					ESP.restart();
+				}
+				publishStats();
+				// Subscribe to the command topic.
+				if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
+					Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
+				else
+					Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
 			}
-			publishStats();
-			// Subscribe to the command topic.
-			if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
-				Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
 			else
-				Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
-		}
-		else
-		{
-			int mqttState = mqttClient.state();
-			/*
+			{
+				int mqttState = mqttClient.state();
+				/*
 				Possible values for client.state():
 				MQTT_CONNECTION_TIMEOUT     -4		// Note: This also comes up when the clientID is already in use.
 				MQTT_CONNECTION_LOST        -3
@@ -330,23 +342,23 @@ int mqttMultiConnect( int maxAttempts )
 				MQTT_CONNECT_BAD_CREDENTIALS 4
 				MQTT_CONNECT_UNAUTHORIZED    5
 			*/
-			Serial.printf( " failed!  Return code: %d", mqttState );
-			if( mqttState == -4 )
-				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
-			else if( mqttState == 2 )
-				Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
-			else
-				Serial.println( "" );
+				Serial.printf( " failed!  Return code: %d", mqttState );
+				if( mqttState == -4 )
+					Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
+				else if( mqttState == 2 )
+					Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
+				else
+					Serial.println( "" );
 
-			Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
-			delay( mqttReconnectInterval );
+				Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
+				delay( mqttReconnectInterval );
+			}
+			attemptNumber++;
 		}
-		attemptNumber++;
 	}
-
-	if( !mqttClient.connected() )
+	else
 	{
-		Serial.println( "Unable to connect to the MQTT broker!" );
+		Serial.println( "Wi-Fi did not connect appropriately, skipping MQTT connection." );
 		return 0;
 	}
 
@@ -395,7 +407,7 @@ void publishStats()
 void readTelemetry()
 {
 	rssi = WiFi.RSSI();
-	UpperLeftValue = analogRead( upperLeft );
+	upperLeftValue = analogRead( upperLeft );
 	upperRightValue = analogRead( upperRight );
 	lowerLeftValue = analogRead( lowerLeft );
 	lowerRightValue = analogRead( lowerRight );
@@ -514,9 +526,51 @@ void printTelemetry()
 	Serial.printf( "Publish count: %ld\n", publishCount );
 	Serial.printf( "Altitude servo position: %d\n", altitudePosition );
 	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
-	Serial.println( UpperLeftValue );
-	Serial.println( upperRightValue );
-	Serial.println( lowerLeftValue );
-	Serial.println( lowerRightValue );
 	Serial.println();
+	int upperSum = upperLeftValue + upperRightValue;
+	int lowerSum = lowerLeftValue + lowerRightValue;
+	int leftSum = upperLeftValue + lowerLeftValue;
+	int rightSum = upperRightValue + lowerRightValue;
+	Serial.println( "Analog readings:" );
+	Serial.println( "/-------------\\" );
+	Serial.printf( "| %4d | %4d | = %4d\n", upperLeftValue, upperRightValue, upperSum );
+	Serial.printf( "---------------\n" );
+	Serial.printf( "| %4d | %4d | = %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
+	Serial.printf( "\\-------------/\n" );
+	Serial.println( "    |      |" );
+	Serial.printf( " %4d  | %4d\n", leftSum, rightSum );
+	Serial.println();
+	if( abs( leftSum - rightSum ) > 50 )
+	{
+		if( leftSum > rightSum )
+		{
+			Serial.println( "Move left!" );
+			azimuthSpeed = -20;
+		}
+		else
+		{
+			Serial.println( "Move right!" );
+			azimuthSpeed = 20;
+		}
+	}
+	else
+	{
+		azimuthSpeed = 0;
+	}
+	setAzimuthSpeed( azimuthSpeed );
+
+	if( abs( upperSum - lowerSum ) > 50 )
+	{
+		if( upperSum > lowerSum )
+		{
+			Serial.println( "Move up!" );
+			altitudePosition++;
+		}
+		else
+		{
+			Serial.println( "Move down!" );
+			altitudePosition--;
+		}
+		setAltitude( altitudePosition );
+	}
 } // End of printTelemetry() function.

@@ -38,15 +38,6 @@ void setup()
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
 
 	wifiMultiConnect();
-	const char *mqttBroker = mqttBrokerArray[networkIndex];
-	const int mqttPort = mqttPortArray[networkIndex];
-
-	// Set the MQTT client parameters.
-	mqttClient.setServer( mqttBroker, mqttPort );
-	// Assign the onReceiveCallback() function to handle MQTT callbacks.
-	mqttClient.setCallback( onReceiveCallback );
-	Serial.printf( "Using MQTT broker: %s\n", mqttBroker );
-	Serial.printf( "Using MQTT port: %d\n", mqttPort );
 
 	configureOTA();
 

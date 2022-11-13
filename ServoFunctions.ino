@@ -29,6 +29,7 @@ void setAltitude( int angle )
 /**
  * @brief The azimuth servo is a continuous-rotation servo.
  * @param speed the speed to set the servo to.
+ * Positive azimuth values rotate the device clockwise (to the right).
  */
 void setAzimuthSpeed( int speed )
 {
@@ -41,7 +42,7 @@ void setAzimuthSpeed( int speed )
 	int pulseWidth = map( speed, -100, 100, minPulseWidth, maxPulseWidth );
 	// Set the servo to the resulting value.
 	azimuthServo.writeMicroseconds( pulseWidth );
-	Serial.printf( "Azimuth speed: %d, adjusted speed: %d\n\n", speed, pulseWidth );
+	Serial.printf( "Azimuth speed: %d, pulse width: %d\n\n", speed, pulseWidth );
 }
 
 
