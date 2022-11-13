@@ -395,6 +395,10 @@ void publishStats()
 void readTelemetry()
 {
 	rssi = WiFi.RSSI();
+	UpperLeftValue = analogRead( upperLeft );
+	upperRightValue = analogRead( upperRight );
+	lowerLeftValue = analogRead( lowerLeft );
+	lowerRightValue = analogRead( lowerRight );
 } // End of readTelemetry() function.
 
 
@@ -510,5 +514,9 @@ void printTelemetry()
 	Serial.printf( "Publish count: %ld\n", publishCount );
 	Serial.printf( "Altitude servo position: %d\n", altitudePosition );
 	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
+	Serial.println( UpperLeftValue );
+	Serial.println( upperRightValue );
+	Serial.println( lowerLeftValue );
+	Serial.println( lowerRightValue );
 	Serial.println();
 } // End of printTelemetry() function.

@@ -21,7 +21,7 @@
 #include <ESP32Servo.h>	  // The servo library to use.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
 #include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
-#include "privateInfo.h" // I use this file to hide my network information from random people on GitHub.
+#include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
 
 
 /**
@@ -77,6 +77,14 @@ const char *rssiTopic = "sunTracker/rssi";					  // The topic used to publish th
 const char *publishCountTopic = "sunTracker/publishCount"; // The topic used to publish the loop count.
 const char *notesTopic = "sunTracker/notes";					  // The topic used to publish notes relevant to this project.
 const unsigned long JSON_DOC_SIZE = 512;						  // The ArduinoJson document size, and size of some buffers.
+const int upperLeft = 36;
+const int upperRight = 39;
+const int lowerLeft = 34;
+const int lowerRight = 35;
+int UpperLeftValue = 0;
+int upperRightValue = 0;
+int lowerLeftValue = 0;
+int lowerRightValue = 0;
 
 
 /**
@@ -103,7 +111,7 @@ long rssi;											  // A global to hold the Received Signal Strength Indicato
 unsigned int networkIndex = 2112;			  // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
 unsigned int wifiConnectionTimeout = 10000; // Set the Wi-Fi connection timeout to 10 seconds.
 unsigned int mqttReconnectInterval = 3000;  // Set the delay between MQTT broker connection attempts to 3 seconds.
-unsigned int telemetryPollInterval = 10000; // How long to wait between sensor polling.
+unsigned int telemetryPollInterval = 100;	  // How long to wait between sensor polling.
 unsigned int publishInterval = 60000;		  // How long to wait between MQTT publishes.
 unsigned int callbackCount = 0;				  // The number of times a callback was received.
 unsigned int MCU_LED = 2;						  // The GPIO which the onboard LED is connected to.
