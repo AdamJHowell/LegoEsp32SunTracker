@@ -543,36 +543,20 @@ void printTelemetry()
 	if( abs( leftSum - rightSum ) > 50 )
 	{
 		if( leftSum > rightSum )
-		{
 			Serial.println( "Move left!" );
-			azimuthSpeed = -20;
-		}
 		else
-		{
 			Serial.println( "Move right!" );
-			azimuthSpeed = 20;
-		}
 	}
 	else
-	{
-		azimuthSpeed = 0;
-	}
-	setAzimuthSpeed( azimuthSpeed );
+		Serial.println( "Azimuth hold!" );
 
 	if( abs( upperSum - lowerSum ) > 50 )
 	{
 		if( upperSum > lowerSum )
-		{
 			Serial.println( "Move up!" );
-			altitudePosition++;
-			altitudePosition = constrain( altitudePosition, 0, 90 );
-		}
 		else
-		{
 			Serial.println( "Move down!" );
-			altitudePosition--;
-			altitudePosition = constrain( altitudePosition, 0, 90 );
-		}
-		setAltitude( altitudePosition );
 	}
+	else
+		Serial.println( "Altitude hold!" );
 } // End of printTelemetry() function.

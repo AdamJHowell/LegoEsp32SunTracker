@@ -60,6 +60,7 @@ void loop()
 	if( lastTelemetryPollTime == 0 || ( ( time > telemetryPollInterval ) && ( time - telemetryPollInterval ) > lastTelemetryPollTime ) )
 	{
 		readTelemetry();
+		moveArm();
 		printTelemetry();
 		lastTelemetryPollTime = millis();
 	}

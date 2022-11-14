@@ -70,3 +70,36 @@ void azimuthDemo()
 		azimuthSpeed += 15;
 	setAzimuthSpeed( azimuthSpeed );
 }
+
+void moveArm()
+{
+	int upperSum = upperLeftValue + upperRightValue;
+	int lowerSum = lowerLeftValue + lowerRightValue;
+	int leftSum = upperLeftValue + lowerLeftValue;
+	int rightSum = upperRightValue + lowerRightValue;
+	if( abs( leftSum - rightSum ) > 50 )
+	{
+		if( leftSum > rightSum )
+			azimuthSpeed = -20;
+		else
+			azimuthSpeed = 20;
+	}
+	else
+		azimuthSpeed = 0;
+	setAzimuthSpeed( azimuthSpeed );
+
+	if( abs( upperSum - lowerSum ) > 50 )
+	{
+		if( upperSum > lowerSum )
+		{
+			altitudePosition++;
+			altitudePosition = constrain( altitudePosition, 0, 90 );
+		}
+		else
+		{
+			altitudePosition--;
+			altitudePosition = constrain( altitudePosition, 0, 90 );
+		}
+		setAltitude( altitudePosition );
+	}
+}

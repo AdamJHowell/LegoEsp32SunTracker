@@ -36,6 +36,7 @@ void setAltitude( int angle );
 void setAzimuthSpeed( int speed );
 void altitudeDemo();
 void azimuthDemo();
+void moveArm();
 void lookupWifiCode( int code, char *buffer );
 void publishStats();
 void readTelemetry();  // Not yet implemented.
