@@ -402,19 +402,6 @@ void publishStats()
 
 
 /**
- * @brief readTelemetry() will gather basic device information and store those values in global variables.
- */
-void readTelemetry()
-{
-	rssi = WiFi.RSSI();
-	upperLeftValue = analogRead( upperLeft );
-	upperRightValue = analogRead( upperRight );
-	lowerLeftValue = analogRead( lowerLeft );
-	lowerRightValue = analogRead( lowerRight );
-} // End of readTelemetry() function.
-
-
-/**
  * @brief publishTelemetry() will publish basic device information to the MQTT broker.
  */
 void publishTelemetry()
@@ -497,66 +484,3 @@ void lookupMQTTCode( int code, char *buffer )
 			snprintf( buffer, 29, "%s", "Unknown MQTT state code" );
 	}
 } // End of lookupMQTTCode() function.
-
-
-/**
- * @brief printTelemetry() will print basic device information to the serial port.
- */
-void printTelemetry()
-{
-	Serial.println();
-	Serial.printf( "MAC address: %s\n", macAddress );
-	int wifiStatusCode = WiFi.status();
-	char buffer[29];
-	lookupWifiCode( wifiStatusCode, buffer );
-	Serial.printf( "Wi-Fi status text: %s\n", buffer );
-	Serial.printf( "Wi-Fi status code: %d\n", wifiStatusCode );
-	if( wifiStatusCode == 3 )
-	{
-		Serial.printf( "IP address: %s\n", ipAddress );
-		Serial.printf( "RSSI: %ld\n", rssi );
-	}
-	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
-	int mqttStateCode = mqttClient.state();
-	lookupMQTTCode( mqttStateCode, buffer );
-	Serial.printf( "MQTT state: %s\n", buffer );
-	Serial.printf( "Host  name: %s\n", HOST_NAME );
-	Serial.printf( "Sketch file name: %s\n", __FILE__ );
-	Serial.printf( "Notes: %s\n", NOTES );
-	Serial.printf( "Publish count: %ld\n", publishCount );
-	Serial.printf( "Altitude servo position: %d\n", altitudePosition );
-	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
-	Serial.println();
-	int upperSum = upperLeftValue + upperRightValue;
-	int lowerSum = lowerLeftValue + lowerRightValue;
-	int leftSum = upperLeftValue + lowerLeftValue;
-	int rightSum = upperRightValue + lowerRightValue;
-	Serial.println( "Analog readings:" );
-	Serial.println( "/-------------\\" );
-	Serial.printf( "| %4d | %4d | = %4d\n", upperLeftValue, upperRightValue, upperSum );
-	Serial.printf( "---------------\n" );
-	Serial.printf( "| %4d | %4d | = %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
-	Serial.printf( "\\-------------/\n" );
-	Serial.println( "    |      |" );
-	Serial.printf( " %4d  | %4d\n", leftSum, rightSum );
-	Serial.println();
-	if( abs( leftSum - rightSum ) > 50 )
-	{
-		if( leftSum > rightSum )
-			Serial.println( "Move left!" );
-		else
-			Serial.println( "Move right!" );
-	}
-	else
-		Serial.println( "Azimuth hold!" );
-
-	if( abs( upperSum - lowerSum ) > 50 )
-	{
-		if( upperSum > lowerSum )
-			Serial.println( "Move up!" );
-		else
-			Serial.println( "Move down!" );
-	}
-	else
-		Serial.println( "Altitude hold!" );
-} // End of printTelemetry() function.
