@@ -27,21 +27,25 @@
 /**
  * Function declarations.
  */
+// NetworkFunctions.ino
 void onReceiveCallback( char *topic, byte *payload, unsigned int length );
 void configureOTA();
-void wifiMultiConnect();
 int checkForSSID( const char *ssidName );
+void wifiMultiConnect();
 int mqttMultiConnect( int maxAttempts );
+void publishStats();
+void publishTelemetry();
+void lookupWifiCode( int code, char *buffer );
+void lookupMQTTCode( int code, char *buffer );
+// ServoFunctions.ino
 void setAltitude( int angle );
 void setAzimuthSpeed( int speed );
 void altitudeDemo();
 void azimuthDemo();
 void moveArm();
-void lookupWifiCode( int code, char *buffer );
-void publishStats();
+// LegoEsp32SunTracker.ino
 void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.
-void publishTelemetry();
 
 
 /**
@@ -55,12 +59,13 @@ Servo azimuthServo;						  // A Servo class object for controlling the azimuth d
 
 /**
  * Global Network constants.
- * If you do not use the privateInfo.h file to hold your network information, you will need to set these four consts to suit your needs.
+ * If you do not use the privateInfo.h file to hold your network information, you will need to set these five lines to suit your needs.
  */
-//const char *wifiSsidArray[2] = { "HomeWiFi", "WorkWiFi" };
-//const char *wifiPassArray[2] = { "pass1", "pass2" };
-//const char *mqttBrokerArray[2] = { "192.168.1.5", "10.10.10.27" };
-//const int mqttPortArray[2] = { 1883, 1883 };
+//#define ELEMENT_COUNT 2
+//const char *wifiSsidArray[ELEMENT_COUNT] = { "HomeWiFi", "WorkWiFi" };
+//const char *wifiPassArray[ELEMENT_COUNT] = { "pass1", "pass2" };
+//const char *mqttBrokerArray[ELEMENT_COUNT] = { "192.168.1.5", "10.10.10.27" };
+//const int mqttPortArray[ELEMENT_COUNT] = { 1883, 1883 };
 
 
 /**
@@ -106,18 +111,22 @@ int maxPulseWidth = 2500;	// The maximum pulse width to use with servos.
 /**
  * Global variables.
  */
-char ipAddress[16];								  // A character array to hold the IP address.
-char macAddress[18];								  // A character array to hold the MAC address, and append a dash and 3 numbers.
-long rssi;											  // A global to hold the Received Signal Strength Indicator.
-unsigned int networkIndex = 2112;			  // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
-unsigned int wifiConnectionTimeout = 10000; // Set the Wi-Fi connection timeout to 10 seconds.
-unsigned int mqttReconnectInterval = 3000;  // Set the delay between MQTT broker connection attempts to 3 seconds.
-unsigned int telemetryPollInterval = 1000;	  // How long to wait between sensor polling.
-unsigned int publishInterval = 60000;		  // How long to wait between MQTT publishes.
-unsigned int callbackCount = 0;				  // The number of times a callback was received.
-unsigned int MCU_LED = 2;						  // The GPIO which the onboard LED is connected to.
-unsigned long publishCount = 0;				  // A counter of how many times the stats have been published.
-unsigned long lastTelemetryPollTime = 0;	  // The last time sensors were polled.
-unsigned long lastPublishTime = 0;			  // The last time a MQTT publish was performed.
+char ipAddress[16];									 // A character array to hold the IP address.
+char macAddress[18];									 // A character array to hold the MAC address, and append a dash and 3 numbers.
+long rssi = 0;											 // A global to hold the Received Signal Strength Indicator.
+unsigned int networkIndex = 2112;				 // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
+unsigned int wifiConnectionTimeout = 10000;	 // Set the Wi-Fi connection timeout to 10 seconds.
+unsigned int mqttReconnectInterval = 3000;	 // Set the minimum time between sequential MQTT broker connection attempts to 3 seconds.
+unsigned int mqttReconnectCooldown = 20000;	 // Set the minimum time between calls to mqttMultiConnect() to 20 seconds.
+unsigned int telemetryPollInterval = 50;		 // How long to wait between sensor polling.
+unsigned int telemetryProcessInterval = 1000; // How long to wait between sensor processing.
+unsigned int publishInterval = 60000;			 // How long to wait between MQTT publishes.
+unsigned int callbackCount = 0;					 // The number of times a callback was received.
+unsigned int MCU_LED = 2;							 // The GPIO which the onboard LED is connected to.
+unsigned long publishCount = 0;					 // A counter of how many times the stats have been published.
+unsigned long lastTelemetryPollTime = 0;		 // The last time sensors were polled.
+unsigned long lastTelemetryProcessTime = 0;	 // The last time sensor data was acted on.
+unsigned long lastPublishTime = 0;				 // The last time a MQTT publish was performed.
+unsigned long lastMqttConnectionTime = 0;		 // The last time a MQTT connection was attempted.
 
 #endif // LEGO_ESP32_SUN_TRACKER_H

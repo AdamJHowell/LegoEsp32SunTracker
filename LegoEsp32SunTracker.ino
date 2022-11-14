@@ -5,6 +5,10 @@
 #include "LegoEsp32SunTracker.h"
 
 
+// ToDo: Move the altitude proportional to the upperSum/lowerSum delta.
+// ToDo: Move the azimuth proportional to the leftSum/RightSum delta.
+
+
 /**
  * @brief readTelemetry() will gather basic device information and store those values in global variables.
  */
@@ -35,7 +39,8 @@ void printTelemetry()
 		Serial.printf( "IP address: %s\n", ipAddress );
 		Serial.printf( "RSSI: %ld\n", rssi );
 	}
-	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	// This line was causing an ESP core panic.
+//	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	int mqttStateCode = mqttClient.state();
 	lookupMQTTCode( mqttStateCode, buffer );
 	Serial.printf( "MQTT state: %s\n", buffer );
@@ -57,17 +62,8 @@ void printTelemetry()
 	Serial.printf( "| %4d | %4d | = %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
 	Serial.printf( "\\-------------/\n" );
 	Serial.println( "    |      |" );
-	Serial.printf( " %4d  | %4d\n", leftSum, rightSum );
+	Serial.printf( "  %4d | %4d\n", leftSum, rightSum );
 	Serial.println();
-	if( abs( leftSum - rightSum ) > 50 )
-	{
-		if( leftSum > rightSum )
-			Serial.println( "Move left!" );
-		else
-			Serial.println( "Move right!" );
-	}
-	else
-		Serial.println( "Azimuth hold!" );
 
 	if( abs( upperSum - lowerSum ) > 50 )
 	{
@@ -78,6 +74,16 @@ void printTelemetry()
 	}
 	else
 		Serial.println( "Altitude hold!" );
+
+	if( abs( leftSum - rightSum ) > 50 )
+	{
+		if( leftSum > rightSum )
+			Serial.println( "Move left!" );
+		else
+			Serial.println( "Move right!" );
+	}
+	else
+		Serial.println( "Azimuth hold!" );
 } // End of printTelemetry() function.
 
 
@@ -125,23 +131,31 @@ void loop()
 {
 	// Process OTA requests.
 	ArduinoOTA.handle();
-
-	//	Check the MQTT connection, and reconnect if needed.
-	if( !mqttClient.connected() )
-		mqttMultiConnect( 3 );
-	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
-	mqttClient.loop();
-
 	unsigned long time = millis();
+	// Poll the first time.  Avoid subtraction overflow.  Poll every interval.
 	if( lastTelemetryPollTime == 0 || ( ( time > telemetryPollInterval ) && ( time - telemetryPollInterval ) > lastTelemetryPollTime ) )
 	{
 		readTelemetry();
-		moveArm();
-		printTelemetry();
 		lastTelemetryPollTime = millis();
 	}
 
+	//	Check the MQTT connection, and reconnect if needed.
+	if( !mqttClient.connected() )
+		mqttMultiConnect( 1 );
+	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
+	mqttClient.loop();
+
 	time = millis();
+	// Process the first time.  Avoid subtraction overflow.  Process every interval.
+	if( lastTelemetryProcessTime == 0 || ( ( time > telemetryProcessInterval ) && ( time - telemetryProcessInterval ) > lastTelemetryProcessTime ) )
+	{
+		moveArm();
+		printTelemetry();
+		lastTelemetryProcessTime = millis();
+	}
+
+	time = millis();
+	// Publish the first time.  Avoid subtraction overflow.  Publish every interval.
 	if( lastPublishTime == 0 || ( ( time > publishInterval ) && ( time - publishInterval ) > lastPublishTime ) )
 	{
 		publishTelemetry();

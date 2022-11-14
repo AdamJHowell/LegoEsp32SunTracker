@@ -6,6 +6,7 @@
  * It is not a continuous-rotation servo.
  * The allowed range will be 0°-90°.
  * @param angle the angle to set the servo to.
+ * Nothing in this function is blocking.
  */
 void setAltitude( int angle )
 {
@@ -30,6 +31,7 @@ void setAltitude( int angle )
  * @brief The azimuth servo is a continuous-rotation servo.
  * @param speed the speed to set the servo to.
  * Positive azimuth values rotate the device clockwise (to the right).
+ * Nothing in this function is blocking.
  */
 void setAzimuthSpeed( int speed )
 {
@@ -48,6 +50,7 @@ void setAzimuthSpeed( int speed )
 
 /**
  * @brief A simple function that demonstrates movement on the altitude axis.
+ * Nothing in this function is blocking.
  */
 void altitudeDemo()
 {
@@ -61,6 +64,7 @@ void altitudeDemo()
 
 /**
  * @brief A simple function that demonstrates movement on the azimuth axis.
+ * Nothing in this function is blocking.
  */
 void azimuthDemo()
 {
@@ -71,12 +75,26 @@ void azimuthDemo()
 	setAzimuthSpeed( azimuthSpeed );
 }
 
+
+/**
+ * @brief A simple function that demonstrates movement on the azimuth axis.
+ * Nothing in this function is blocking.
+ */
 void moveArm()
 {
 	int upperSum = upperLeftValue + upperRightValue;
 	int lowerSum = lowerLeftValue + lowerRightValue;
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
+
+	Serial.printf( "l-r: %d\n", leftSum - rightSum );
+	Serial.printf( "u-l: %d\n", upperSum - lowerSum );
+	// map( speed, -100, 100, minPulseWidth, maxPulseWidth )
+	int tempAlt = map( upperSum - lowerSum, -8190, 8190, 0, 90 );
+	int tempAz = map( leftSum - rightSum, -8190, 8190, -100, 100 );
+	Serial.printf( "Altitude servo suggestion: %d\n", tempAlt );
+	Serial.printf( "Azimuth servo suggestion : %d\n", tempAz );
+
 	if( abs( leftSum - rightSum ) > 50 )
 	{
 		if( leftSum > rightSum )
