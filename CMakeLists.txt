@@ -9,7 +9,7 @@ add_executable( LegoEsp32SunTracker
 		NetworkFunctions.ino
 		ServoFunctions.ino
 		privateInfo.h
-		)
+		ServoFunctions.h )
 
 include_directories( .
 		C:/Users/Adam/AppData/Local/Arduino15/packages/arduino/hardware/avr/1.8.5/cores/arduino/
