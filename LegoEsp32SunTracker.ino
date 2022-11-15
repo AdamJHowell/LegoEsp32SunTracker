@@ -15,10 +15,10 @@
 void readTelemetry()
 {
 	rssi = WiFi.RSSI();
-	upperLeftValue = analogRead( upperLeft );
-	upperRightValue = analogRead( upperRight );
-	lowerLeftValue = analogRead( lowerLeft );
-	lowerRightValue = analogRead( lowerRight );
+	upperLeftValue = analogRead( upperLeftGPIO );
+	upperRightValue = analogRead( upperRightGPIO );
+	lowerLeftValue = analogRead( lowerLeftGPIO );
+	lowerRightValue = analogRead( lowerRightGPIO );
 } // End of readTelemetry() function.
 
 
@@ -39,12 +39,12 @@ void printTelemetry()
 		Serial.printf( "IP address: %s\n", ipAddress );
 		Serial.printf( "RSSI: %ld\n", rssi );
 	}
-	// This line was causing an ESP core panic.
-//	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	if( networkIndex != 2112 )
+		Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	int mqttStateCode = mqttClient.state();
 	lookupMQTTCode( mqttStateCode, buffer );
 	Serial.printf( "MQTT state: %s\n", buffer );
-	Serial.printf( "Host  name: %s\n", HOST_NAME );
+	Serial.printf( "ESP32 hostname: %s\n", HOST_NAME );
 	Serial.printf( "Sketch file name: %s\n", __FILE__ );
 	Serial.printf( "Notes: %s\n", NOTES );
 	Serial.printf( "Publish count: %ld\n", publishCount );

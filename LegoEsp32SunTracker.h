@@ -18,10 +18,10 @@
 #endif
 #include <WiFiUdp.h>		  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
 #include <ArduinoOTA.h>	  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
-#include <ESP32Servo.h>	  // The servo library to use.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
 #include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 #include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
+#include "ServoFunctions.h"
 
 
 /**
@@ -37,12 +37,6 @@ void publishStats();
 void publishTelemetry();
 void lookupWifiCode( int code, char *buffer );
 void lookupMQTTCode( int code, char *buffer );
-// ServoFunctions.ino
-void setAltitude( int angle );
-void setAzimuthSpeed( int speed );
-void altitudeDemo();
-void azimuthDemo();
-void moveArm();
 // LegoEsp32SunTracker.ino
 void readTelemetry();  // Not yet implemented.
 void printTelemetry(); // Not yet implemented.
@@ -53,8 +47,6 @@ void printTelemetry(); // Not yet implemented.
  */
 struct WiFiClient espClient;			  // Create a WiFiClient to connect to the local network.
 PubSubClient mqttClient( espClient ); // Create a PubSub MQTT client object that uses the WiFiClient.
-Servo altitudeServo;						  // A Servo class object for controlling the altitude position.
-Servo azimuthServo;						  // A Servo class object for controlling the azimuth direction and speed.
 
 
 /**
@@ -83,29 +75,14 @@ const char *rssiTopic = "sunTracker/rssi";					  // The topic used to publish th
 const char *publishCountTopic = "sunTracker/publishCount"; // The topic used to publish the loop count.
 const char *notesTopic = "sunTracker/notes";					  // The topic used to publish notes relevant to this project.
 const unsigned long JSON_DOC_SIZE = 512;						  // The ArduinoJson document size, and size of some buffers.
-const int upperLeft = 36;
-const int upperRight = 39;
-const int lowerLeft = 34;
-const int lowerRight = 35;
+const int upperLeftGPIO = 36;
+const int upperRightGPIO = 39;
+const int lowerLeftGPIO = 34;
+const int lowerRightGPIO = 35;
 int upperLeftValue = 0;
 int upperRightValue = 0;
 int lowerLeftValue = 0;
 int lowerRightValue = 0;
-
-
-/**
- * Global servo variables.
- * Depending on your servo make, the pulse width minimum and maximum may vary.
- * Adjust these to be as close to the mechanical limits of each servo, without hitting those actual limits.
- * For continuous rotation servos, use the declared minimum and maximum values from the specification sheet.
- * If unknown, 500 μsec is the most common minimum, and 2500 μsec is the most common maximum.
- */
-int azimuthServoPin = 23;	// The GPIO which the azimuth servo connects to.
-int azimuthSpeed = 0;		// Holds the current position of the azimuth servo.  The default of 1500 is motionless.
-int altitudeServoPin = 22; // The GPIO which the altitude servo connects to.
-int altitudePosition = 45; // Holds the current position of the azimuth servo.  The default of 90 is directly up.
-int minPulseWidth = 500;	// The minimum pulse width to use with servos.
-int maxPulseWidth = 2500;	// The maximum pulse width to use with servos.
 
 
 /**
