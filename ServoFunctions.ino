@@ -23,7 +23,7 @@ void setAltitude( int angle )
 	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );
-//	Serial.printf( "Altitude position: %d, pulse width: %d\n\n", altitudePosition, pulseWidth );
+	//	Serial.printf( "Altitude position: %d, pulse width: %d\n\n", altitudePosition, pulseWidth );
 } // End of setAltitude() function.
 
 
@@ -44,7 +44,7 @@ void setAzimuthSpeed( int speed )
 	int pulseWidth = map( speed, -100, 100, minPulseWidth, maxPulseWidth );
 	// Set the servo to the resulting value.
 	azimuthServo.writeMicroseconds( pulseWidth );
-//	Serial.printf( "Azimuth speed: %d, pulse width: %d\n\n", speed, pulseWidth );
+	//	Serial.printf( "Azimuth speed: %d, pulse width: %d\n\n", speed, pulseWidth );
 } // End of setAzimuthSpeed() function.
 
 
