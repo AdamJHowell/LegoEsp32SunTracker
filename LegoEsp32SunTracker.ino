@@ -40,7 +40,7 @@ void printTelemetry()
 		Serial.printf( "RSSI: %ld\n", rssi );
 	}
 	// This line was causing an ESP core panic.
-//	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	//	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	int mqttStateCode = mqttClient.state();
 	lookupMQTTCode( mqttStateCode, buffer );
 	Serial.printf( "MQTT state: %s\n", buffer );
@@ -56,14 +56,17 @@ void printTelemetry()
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
 	Serial.println( "Analog readings:" );
-	Serial.println( "/-------------\\" );
-	Serial.printf( "| %4d | %4d | = %4d\n", upperLeftValue, upperRightValue, upperSum );
-	Serial.printf( "---------------\n" );
-	Serial.printf( "| %4d | %4d | = %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
-	Serial.printf( "\\-------------/\n" );
-	Serial.println( "    |      |" );
-	Serial.printf( "  %4d | %4d\n", leftSum, rightSum );
+	Serial.printf( "┌──────┬──────┐\n" );
+	Serial.printf( "│ %4d │ %4d ├── %4d\n", upperLeftValue, upperRightValue, upperSum );
+	Serial.printf( "├──────┼──────┤\n" );
+	Serial.printf( "│ %4d │ %4d ├── %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
+	Serial.printf( "└───┬─┴────┬─┘\n" );
+	Serial.printf( "    │      │\n" );
+	Serial.printf( "  %4d │ %4d\n", leftSum, rightSum );
 	Serial.println();
+
+	Serial.printf( "u-l: %d\n", upperSum - lowerSum );
+	Serial.printf( "l-r: %d\n", leftSum - rightSum );
 
 	if( abs( upperSum - lowerSum ) > 50 )
 	{
@@ -127,6 +130,19 @@ void setup()
 } // End of setup() function.
 
 
+/**
+ * @brief toggleLED() will change the state of the LED.
+ * This function does not manage any timings.
+ */
+void toggleLED()
+{
+	if( digitalRead( MCU_LED ) != 1 )
+		digitalWrite( MCU_LED, 1 );
+	else
+		digitalWrite( MCU_LED, 0 );
+} // End of toggleLED() function.
+
+
 void loop()
 {
 	// Process OTA requests.
@@ -150,8 +166,24 @@ void loop()
 	if( lastTelemetryProcessTime == 0 || ( ( time > telemetryProcessInterval ) && ( time - telemetryProcessInterval ) > lastTelemetryProcessTime ) )
 	{
 		moveArm();
-		printTelemetry();
 		lastTelemetryProcessTime = millis();
+
+		// If Wi-Fi is connected, but MQTT is not, blink the LED.
+		if( WiFi.status() == WL_CONNECTED )
+		{
+			if( mqttClient.state() != 0 )
+				toggleLED();
+			else
+				digitalWrite( MCU_LED, 1 );
+		}
+	}
+
+	time = millis();
+	// Print the first time.  Avoid subtraction overflow.  Print every interval.
+	if( lastTelemetryPrintTime == 0 || ( ( time > telemetryPrintInterval ) && ( time - telemetryPrintInterval ) > lastTelemetryPrintTime ) )
+	{
+		printTelemetry();
+		lastTelemetryPrintTime = millis();
 	}
 
 	time = millis();

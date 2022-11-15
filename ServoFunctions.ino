@@ -23,8 +23,8 @@ void setAltitude( int angle )
 	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );
-	Serial.printf( "Altitude position: %d\n\n", altitudePosition );
-}
+//	Serial.printf( "Altitude position: %d, pulse width: %d\n\n", altitudePosition, pulseWidth );
+} // End of setAltitude() function.
 
 
 /**
@@ -44,8 +44,8 @@ void setAzimuthSpeed( int speed )
 	int pulseWidth = map( speed, -100, 100, minPulseWidth, maxPulseWidth );
 	// Set the servo to the resulting value.
 	azimuthServo.writeMicroseconds( pulseWidth );
-	Serial.printf( "Azimuth speed: %d, pulse width: %d\n\n", speed, pulseWidth );
-}
+//	Serial.printf( "Azimuth speed: %d, pulse width: %d\n\n", speed, pulseWidth );
+} // End of setAzimuthSpeed() function.
 
 
 /**
@@ -59,7 +59,7 @@ void altitudeDemo()
 	else
 		altitudePosition = 0;
 	setAltitude( altitudePosition );
-}
+} // End of altitudeDemo() function.
 
 
 /**
@@ -73,11 +73,11 @@ void azimuthDemo()
 	else
 		azimuthSpeed += 15;
 	setAzimuthSpeed( azimuthSpeed );
-}
+} // End of azimuthDemo() function.
 
 
 /**
- * @brief A simple function that demonstrates movement on the azimuth axis.
+ * @brief This function uses the analog readings to determine how the servos should be moved.
  * Nothing in this function is blocking.
  */
 void moveArm()
@@ -87,37 +87,72 @@ void moveArm()
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
 
-	Serial.printf( "l-r: %d\n", leftSum - rightSum );
-	Serial.printf( "u-l: %d\n", upperSum - lowerSum );
-	// map( speed, -100, 100, minPulseWidth, maxPulseWidth )
-	int tempAlt = map( upperSum - lowerSum, -8190, 8190, 0, 90 );
-	int tempAz = map( leftSum - rightSum, -8190, 8190, -100, 100 );
-	Serial.printf( "Altitude servo suggestion: %d\n", tempAlt );
-	Serial.printf( "Azimuth servo suggestion : %d\n", tempAz );
+	//	int tempAlt = map( upperSum - lowerSum, -8190, 8190, 0, 90 );
+	//	int tempAz = map( leftSum - rightSum, -8190, 8190, -100, 100 );
+	//	Serial.printf( "Altitude servo suggestion: %d\n", tempAlt );
+	//	Serial.printf( "Azimuth servo suggestion : %d\n", tempAz );
 
-	if( abs( leftSum - rightSum ) > 50 )
+
+	//	╭───────────────────╮
+	//	│  Adjust altitude  │
+	//	╰───────────────────╯
+	if( abs( upperSum - lowerSum ) > 200 )
+	{
+		if( upperSum > lowerSum )
+			altitudePosition += 5;
+		else
+			altitudePosition -= 5;
+	}
+	else if( abs( upperSum - lowerSum ) > 100 )
+	{
+		if( upperSum > lowerSum )
+			altitudePosition += 2;
+		else
+			altitudePosition -= 2;
+	}
+	else if( abs( upperSum - lowerSum ) > 50 )
+	{
+		if( upperSum > lowerSum )
+			altitudePosition++;
+		else
+			altitudePosition--;
+	}
+	altitudePosition = constrain( altitudePosition, 0, 90 );
+	setAltitude( altitudePosition );
+
+
+	//	╭───────────────╮
+	//	│  Set azimuth  │
+	//	╰───────────────╯
+	if( abs( leftSum - rightSum ) > 1000 )
 	{
 		if( leftSum > rightSum )
-			azimuthSpeed = -20;
+			azimuthSpeed = -100;
 		else
-			azimuthSpeed = 20;
+			azimuthSpeed = 100;
+	}
+	else if( abs( leftSum - rightSum ) > 800 )
+	{
+		if( leftSum > rightSum )
+			azimuthSpeed = -50;
+		else
+			azimuthSpeed = 50;
+	}
+	else if( abs( leftSum - rightSum ) > 100 )
+	{
+		if( leftSum > rightSum )
+			azimuthSpeed = -30;
+		else
+			azimuthSpeed = 30;
+	}
+	else if( abs( leftSum - rightSum ) > 50 )
+	{
+		if( leftSum > rightSum )
+			azimuthSpeed = -15;
+		else
+			azimuthSpeed = 15;
 	}
 	else
 		azimuthSpeed = 0;
 	setAzimuthSpeed( azimuthSpeed );
-
-	if( abs( upperSum - lowerSum ) > 50 )
-	{
-		if( upperSum > lowerSum )
-		{
-			altitudePosition++;
-			altitudePosition = constrain( altitudePosition, 0, 90 );
-		}
-		else
-		{
-			altitudePosition--;
-			altitudePosition = constrain( altitudePosition, 0, 90 );
-		}
-		setAltitude( altitudePosition );
-	}
-}
+} // End of moveArm() function.

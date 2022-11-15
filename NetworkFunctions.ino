@@ -255,7 +255,6 @@ void wifiMultiConnect()
 		}
 		else
 		{
-			Serial.println( "\ncheckForSSID() was unable to find the network!\n" );
 			// Set networkIndex back to its uninitialized value;
 			networkIndex = 2112;
 		}

@@ -111,22 +111,24 @@ int maxPulseWidth = 2500;	// The maximum pulse width to use with servos.
 /**
  * Global variables.
  */
-char ipAddress[16];									 // A character array to hold the IP address.
-char macAddress[18];									 // A character array to hold the MAC address, and append a dash and 3 numbers.
-long rssi = 0;											 // A global to hold the Received Signal Strength Indicator.
-unsigned int networkIndex = 2112;				 // An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
-unsigned int wifiConnectionTimeout = 10000;	 // Set the Wi-Fi connection timeout to 10 seconds.
-unsigned int mqttReconnectInterval = 3000;	 // Set the minimum time between sequential MQTT broker connection attempts to 3 seconds.
-unsigned int mqttReconnectCooldown = 20000;	 // Set the minimum time between calls to mqttMultiConnect() to 20 seconds.
-unsigned int telemetryPollInterval = 50;		 // How long to wait between sensor polling.
-unsigned int telemetryProcessInterval = 1000; // How long to wait between sensor processing.
-unsigned int publishInterval = 60000;			 // How long to wait between MQTT publishes.
-unsigned int callbackCount = 0;					 // The number of times a callback was received.
-unsigned int MCU_LED = 2;							 // The GPIO which the onboard LED is connected to.
-unsigned long publishCount = 0;					 // A counter of how many times the stats have been published.
-unsigned long lastTelemetryPollTime = 0;		 // The last time sensors were polled.
-unsigned long lastTelemetryProcessTime = 0;	 // The last time sensor data was acted on.
-unsigned long lastPublishTime = 0;				 // The last time a MQTT publish was performed.
-unsigned long lastMqttConnectionTime = 0;		 // The last time a MQTT connection was attempted.
+char ipAddress[16];									// A character array to hold the IP address.
+char macAddress[18];									// A character array to hold the MAC address, and append a dash and 3 numbers.
+long rssi = 0;											// A global to hold the Received Signal Strength Indicator.
+unsigned int networkIndex = 2112;				// An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
+unsigned int wifiConnectionTimeout = 10000;	// Set the Wi-Fi connection timeout to 10 seconds.
+unsigned int mqttReconnectInterval = 3000;	// Set the minimum time between sequential MQTT broker connection attempts to 3 seconds.
+unsigned int mqttReconnectCooldown = 20000;	// Set the minimum time between calls to mqttMultiConnect() to 20 seconds.
+unsigned int telemetryPollInterval = 20;		// How long to wait between sensor polling.
+unsigned int telemetryProcessInterval = 200; // How long to wait between sensor processing.
+unsigned int telemetryPrintInterval = 5000;	// How long to wait between sensor processing.
+unsigned int publishInterval = 60000;			// How long to wait between MQTT publishes.
+unsigned int callbackCount = 0;					// The number of times a callback was received.
+unsigned int MCU_LED = 2;							// The GPIO which the onboard LED is connected to.
+unsigned long publishCount = 0;					// A counter of how many times the stats have been published.
+unsigned long lastTelemetryPollTime = 0;		// The last time sensors were polled.
+unsigned long lastTelemetryProcessTime = 0;	// The last time sensor data was acted on.
+unsigned long lastTelemetryPrintTime = 0;		// The last time sensor data was acted on.
+unsigned long lastPublishTime = 0;				// The last time a MQTT publish was performed.
+unsigned long lastMqttConnectionTime = 0;		// The last time a MQTT connection was attempted.
 
 #endif // LEGO_ESP32_SUN_TRACKER_H
