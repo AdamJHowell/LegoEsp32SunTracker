@@ -89,5 +89,18 @@ Move servo examples:
 
 Topic: sunTracker/commands  
 Valid "servoName" values are "azimuth" and "altitude".  
-For altitude, valid values are integers from 0 to 90, where those values represent the angle. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent mechanical interference with other structures.  If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.  
-For azimuth, valid values are integers from -100 to 100, where those values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above.  If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.
+For altitude, valid values are integers from 0 to 90, where those values represent the angle. The servo is capable of rotation between 0° and 360°, but this is being constrained in this program to prevent mechanical interference with other structures. If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.  
+For azimuth, valid values are integers from -100 to 100, where those values represent percentages of maximum speed. Positive values will rotate clockwise when viewed from above. Negative values will rotate counterclockwise when viewed from above. If values outside that range are provided, they will be constrained to the nearest valid value before passed to the servo.
+
+## LED
+
+The LED now indicates the status of the Wi-Fi and MQTT connections. It has three states:
+
+* An extinguished LED means Wi-Fi is not connected.
+* A blinking LED means Wi-Fi is connected, but there is no connection to the MQTT broker.
+* An illuminated LED means both Wi-Fi and MQTT are connected.
+
+### ToDo:
+
+* Modify the Wi-Fi connection code to use callbacks, so it no longer blocks.
+* Modify the MQTT connection code to not block.

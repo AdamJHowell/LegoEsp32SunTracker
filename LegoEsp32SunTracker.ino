@@ -15,10 +15,10 @@
 void readTelemetry()
 {
 	rssi = WiFi.RSSI();
-	upperLeftValue = analogRead( upperLeft );
-	upperRightValue = analogRead( upperRight );
-	lowerLeftValue = analogRead( lowerLeft );
-	lowerRightValue = analogRead( lowerRight );
+	upperLeftValue = analogRead( upperLeftGPIO );
+	upperRightValue = analogRead( upperRightGPIO );
+	lowerLeftValue = analogRead( lowerLeftGPIO );
+	lowerRightValue = analogRead( lowerRightGPIO );
 } // End of readTelemetry() function.
 
 
