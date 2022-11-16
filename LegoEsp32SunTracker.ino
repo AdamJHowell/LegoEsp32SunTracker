@@ -56,17 +56,17 @@ void printTelemetry()
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
 	Serial.println( "Analog readings:" );
-	Serial.printf( "┌──────┬──────┐\n" );
+	Serial.printf( "╭──────┬──────╮\n" );
 	Serial.printf( "│ %4d │ %4d ├── %4d\n", upperLeftValue, upperRightValue, upperSum );
 	Serial.printf( "├──────┼──────┤\n" );
 	Serial.printf( "│ %4d │ %4d ├── %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
-	Serial.printf( "└───┬─┴────┬─┘\n" );
+	Serial.printf( "╰───┬──┴───┬──╯\n" );
 	Serial.printf( "    │      │\n" );
-	Serial.printf( "  %4d │ %4d\n", leftSum, rightSum );
+	Serial.printf( "  %4d   %4d\n", leftSum, rightSum );
 	Serial.println();
 
-	Serial.printf( "u-l: %d\n", upperSum - lowerSum );
-	Serial.printf( "l-r: %d\n", leftSum - rightSum );
+	Serial.printf( "Upper - Lower = %d\n", upperSum - lowerSum );
+	Serial.printf( "Left - Right = %d\n", leftSum - rightSum );
 
 	if( abs( upperSum - lowerSum ) > 50 )
 	{
