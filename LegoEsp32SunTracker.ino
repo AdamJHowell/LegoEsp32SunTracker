@@ -104,20 +104,23 @@ void setup()
 	ESP32PWM::allocateTimer( 1 );
 	ESP32PWM::allocateTimer( 2 );
 	ESP32PWM::allocateTimer( 3 );
-	// Standard 50 hz servo.
-	azimuthServo.setPeriodHertz( 50 );
-	// Connects the servo object to GPIO 23, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
-	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
-	setAzimuthSpeed( azimuthSpeed );
+
 	// Standard 50 hz servo.
 	altitudeServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	altitudeServo.attach( altitudeServoPin, minPulseWidth, maxPulseWidth );
 	setAltitude( altitudePosition );
+
+	// Standard 50 hz servo.
+	azimuthServo.setPeriodHertz( 50 );
+	// Connects the servo object to GPIO 23, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
+	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
+	setAzimuthSpeed( azimuthSpeed );
+
 	// Set GPIO 2 (MCU_LED) as an output.
 	pinMode( MCU_LED, OUTPUT );
 	// Turn the LED on.
-	digitalWrite( MCU_LED, HIGH );
+	digitalWrite( MCU_LED, 1 );
 
 	// Set the MAC address variable to its value.
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
