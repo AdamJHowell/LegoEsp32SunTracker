@@ -39,8 +39,12 @@ void printTelemetry()
 		Serial.printf( "IP address: %s\n", ipAddress );
 		Serial.printf( "RSSI: %ld\n", rssi );
 	}
-	// This line was causing an ESP core panic.
-	//	Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	if( networkIndex != 2112 )
+	{
+		Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[ networkIndex ] );
+		Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
+	}
+
 	int mqttStateCode = mqttClient.state();
 	lookupMQTTCode( mqttStateCode, buffer );
 	Serial.printf( "MQTT state: %s\n", buffer );
