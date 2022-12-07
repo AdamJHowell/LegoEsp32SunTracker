@@ -93,7 +93,7 @@ char macAddress[18];									// A character array to hold the MAC address, and a
 long rssi = 0;											// A global to hold the Received Signal Strength Indicator.
 unsigned int networkIndex = 2112;				// An unsigned integer to hold the correct index for the network arrays: wifiSsidArray[], wifiPassArray[], mqttBrokerArray[], and mqttPortArray[].
 unsigned int wifiConnectionTimeout = 10000;	// Set the Wi-Fi connection timeout to 10 seconds.
-unsigned int mqttReconnectInterval = 3000;	// Set the minimum time between sequential MQTT broker connection attempts to 3 seconds.
+unsigned int mqttReconnectInterval = 3000;	// When mqttMultiConnect is set to try multiple times, this is how long to delay between each attempt.
 unsigned int mqttReconnectCooldown = 20000;	// Set the minimum time between calls to mqttMultiConnect() to 20 seconds.
 unsigned int telemetryPollInterval = 20;		// How long to wait between sensor polling.
 unsigned int telemetryProcessInterval = 200; // How long to wait between sensor processing.

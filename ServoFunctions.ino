@@ -2,9 +2,9 @@
 
 
 /**
- * @brief The altitude servo is a full-rotation (360°) servo that needs to be constrained to 90°.
+ * @brief The altitude servo is a full-rotation (360°) servo that needs to be constrained to keep the arm from rotating beyond 90°.
  * It is not a continuous-rotation servo.
- * The allowed range will be 0°-90°.
+ * The allowed range will be 0°-'altitudeMaxAngle'°.
  * @param angle the angle to set the servo to.
  * Nothing in this function is blocking.
  */
@@ -13,14 +13,14 @@ void setAltitude( int angle )
 	// Enforce constraints.
 	if( angle < 0 )
 		angle = 0;
-	if( angle > 90 )
-		angle = 90;
-	// Establish an adjusted maximum pulse width, to enforce a 0°-90° range.
+	if( angle > altitudeMaxAngle )
+		angle = altitudeMaxAngle;
+	// Establish an adjusted maximum pulse width, to enforce a 0°-'altitudeMaxAngle'° range.
 	int pwmRange = maxPulseWidth - minPulseWidth;
 	// The constrained maximum range should be the minimum value plus 1/4 of the range.
 	int modifiedMaxPulseWidth = minPulseWidth + ( pwmRange / 4 );
-	// Map the angle to a pulse width.  Note that with 90 coming before 0, the servo is effectively reversed.
-	int pulseWidth = map( angle, 90, 0, minPulseWidth, modifiedMaxPulseWidth );
+	// Map the angle to a pulse width.  Note that swapping 0 and altitudeMaxAngle will effectively reverse the servo.
+	int pulseWidth = map( angle, 0, altitudeMaxAngle, minPulseWidth, modifiedMaxPulseWidth );
 	// Set the servo to the resulting value.
 	altitudeServo.writeMicroseconds( pulseWidth );
 	//	Serial.printf( "Altitude position: %d, pulse width: %d\n\n", altitudePosition, pulseWidth );
@@ -54,7 +54,7 @@ void setAzimuthSpeed( int speed )
  */
 void altitudeDemo()
 {
-	if( altitudePosition < 90 )
+	if( altitudePosition < altitudeMaxAngle )
 		altitudePosition += 45;
 	else
 		altitudePosition = 0;
@@ -87,7 +87,7 @@ void moveArm()
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
 
-	//	int tempAlt = map( upperSum - lowerSum, -8190, 8190, 0, 90 );
+	//	int tempAlt = map( upperSum - lowerSum, -8190, 8190, 0, altitudeMaxAngle );
 	//	int tempAz = map( leftSum - rightSum, -8190, 8190, -100, 100 );
 	//	Serial.printf( "Altitude servo suggestion: %d\n", tempAlt );
 	//	Serial.printf( "Azimuth servo suggestion : %d\n", tempAz );
@@ -117,7 +117,7 @@ void moveArm()
 		else
 			altitudePosition--;
 	}
-	altitudePosition = constrain( altitudePosition, 0, 90 );
+	altitudePosition = constrain( altitudePosition, 0, altitudeMaxAngle );
 	setAltitude( altitudePosition );
 
 
