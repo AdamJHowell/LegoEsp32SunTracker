@@ -97,14 +97,14 @@ unsigned int mqttReconnectInterval = 3000;	// Set the minimum time between seque
 unsigned int mqttReconnectCooldown = 20000;	// Set the minimum time between calls to mqttMultiConnect() to 20 seconds.
 unsigned int telemetryPollInterval = 20;		// How long to wait between sensor polling.
 unsigned int telemetryProcessInterval = 200; // How long to wait between sensor processing.
-unsigned int telemetryPrintInterval = 5000;	// How long to wait between sensor processing.
+unsigned int telemetryPrintInterval = 5000;	// How long to wait between sensor printing.
 unsigned int publishInterval = 60000;			// How long to wait between MQTT publishes.
 unsigned int callbackCount = 0;					// The number of times a callback was received.
 unsigned int MCU_LED = 2;							// The GPIO which the onboard LED is connected to.
 unsigned long publishCount = 0;					// A counter of how many times the stats have been published.
 unsigned long lastTelemetryPollTime = 0;		// The last time sensors were polled.
 unsigned long lastTelemetryProcessTime = 0;	// The last time sensor data was acted on.
-unsigned long lastTelemetryPrintTime = 0;		// The last time sensor data was acted on.
+unsigned long lastTelemetryPrintTime = 0;		// The last time sensor data was printed.
 unsigned long lastPublishTime = 0;				// The last time a MQTT publish was performed.
 unsigned long lastMqttConnectionTime = 0;		// The last time a MQTT connection was attempted.
 
