@@ -61,8 +61,8 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 					{
 						if( callbackJsonDoc.containsKey( "value" ) )
 						{
-							altitudePosition = callbackJsonDoc["value"];
-							setAltitude( altitudePosition );
+							altitudeSpeed = callbackJsonDoc["value"];
+							setAltitude( altitudeSpeed );
 						}
 						else
 							Serial.printf( "The 'moveServo' command requires the 'value' property to be set!" );

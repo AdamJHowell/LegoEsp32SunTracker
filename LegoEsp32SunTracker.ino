@@ -41,7 +41,7 @@ void printTelemetry()
 	}
 	if( networkIndex != 2112 )
 	{
-		Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[ networkIndex ] );
+		Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[networkIndex] );
 		Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
 	}
 
@@ -52,7 +52,7 @@ void printTelemetry()
 	Serial.printf( "Sketch file name: %s\n", __FILE__ );
 	Serial.printf( "Notes: %s\n", NOTES );
 	Serial.printf( "Publish count: %ld\n", publishCount );
-	Serial.printf( "Altitude servo position: %d\n", altitudePosition );
+	Serial.printf( "Altitude servo speed: %d\n", altitudeSpeed );
 	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
 	Serial.println();
 	int upperSum = upperLeftValue + upperRightValue;
@@ -113,13 +113,18 @@ void setup()
 	altitudeServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 22, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	altitudeServo.attach( altitudeServoPin, minPulseWidth, maxPulseWidth );
-	setAltitude( altitudePosition );
+	//	setAltitude( altitudePosition );
+	setAltitudeSpeed( altitudeSpeed );
 
 	// Standard 50 hz servo.
 	azimuthServo.setPeriodHertz( 50 );
 	// Connects the servo object to GPIO 23, sets 500 μsec as the minimum pulse width and 2500 μsec as the maximum pulse width.
 	azimuthServo.attach( azimuthServoPin, minPulseWidth, maxPulseWidth );
 	setAzimuthSpeed( azimuthSpeed );
+
+	// Limit switches.
+	pinMode( declinationStopPin, INPUT );
+	pinMode( inclinationStopPin, INPUT );
 
 	// Set GPIO 2 (MCU_LED) as an output.
 	pinMode( MCU_LED, OUTPUT );
