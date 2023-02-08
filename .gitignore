@@ -1,4 +1,10 @@
-privateInfo.h
+.idea/
+*.iml
+privateInfo.*
+debug_custom.json
+*.svd
+
+privateInfo.*
 cmake-build-*/
 .idea/
 .pio
