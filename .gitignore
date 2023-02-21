@@ -4,8 +4,5 @@ privateInfo.*
 debug_custom.json
 debug.cfg
 *.svd
-
-privateInfo.*
 cmake-build-*/
-.idea/
 .pio
