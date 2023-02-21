@@ -9,17 +9,19 @@
 // These headers are installed when the ESP8266 is installed in board manager.
 #include <ESP8266WiFi.h> // ESP8266 WiFi support.  https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi
 #include <ESP8266mDNS.h> // OTA - mDNSResponder (Multicast DNS) for the ESP8266 family.
-#elif ESP32
+#define LED_ON	 0
+#define LED_OFF 1
+#else
 // These headers are installed when the ESP32 is installed in board manager.
 #include <WiFi.h>		// ESP32 Wifi support.  https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFi/src/WiFi.h
 #include <ESPmDNS.h> // OTA - Multicast DNS for the ESP32.
-#else
-#include <WiFi.h> // Arduino Wi-Fi support.  This header is part of the standard library.  https://www.arduino.cc/en/Reference/WiFi
+#define LED_ON	 1
+#define LED_OFF 0
 #endif
 #include <WiFiUdp.h>		  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
 #include <ArduinoOTA.h>	  // OTA - The Arduino OTA library.  Specific version of this are installed along with specific boards in board manager.
 #include <ArduinoJson.h>  // A JSON processing library.  Author: Benoît Blanchon  https://arduinojson.org/
-#include <PubSubClient.h> // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
+#include "PubSubClient.h" // PubSub is the MQTT API maintained by Nick O'Leary: https://github.com/knolleary/pubsubclient
 #include "privateInfo.h"  // I use this file to hide my network information from random people on GitHub.
 #include "ServoFunctions.h"
 
@@ -31,6 +33,7 @@
 void onReceiveCallback( char *topic, byte *payload, unsigned int length );
 void configureOTA();
 int checkForSSID( const char *ssidName );
+bool wifiConnect( const char *ssid, const char *password );
 void wifiMultiConnect();
 int mqttMultiConnect( int maxAttempts );
 void publishStats();
@@ -75,6 +78,7 @@ const char *rssiTopic = "sunTracker/rssi";					  // The topic used to publish th
 const char *publishCountTopic = "sunTracker/publishCount"; // The topic used to publish the loop count.
 const char *notesTopic = "sunTracker/notes";					  // The topic used to publish notes relevant to this project.
 const unsigned long JSON_DOC_SIZE = 512;						  // The ArduinoJson document size, and size of some buffers.
+const unsigned int MILLIS_IN_SEC = 1000;						  // The number of milliseconds in one second.
 const int upperLeftGPIO = 36;
 const int upperRightGPIO = 39;
 const int lowerLeftGPIO = 34;
@@ -101,11 +105,18 @@ unsigned int telemetryPrintInterval = 5000;	// How long to wait between sensor p
 unsigned int publishInterval = 60000;			// How long to wait between MQTT publishes.
 unsigned int callbackCount = 0;					// The number of times a callback was received.
 unsigned int MCU_LED = 2;							// The GPIO which the onboard LED is connected to.
+unsigned int wifiConnectCount = 0;				// A counter for how many times the wifiConnect() function has been called.
+unsigned int mqttConnectCount = 0;				// A counter for how many times the mqttConnect() function has been called.
 unsigned long publishCount = 0;					// A counter of how many times the stats have been published.
 unsigned long lastTelemetryPollTime = 0;		// The last time sensors were polled.
 unsigned long lastTelemetryProcessTime = 0;	// The last time sensor data was acted on.
 unsigned long lastTelemetryPrintTime = 0;		// The last time sensor data was printed.
 unsigned long lastPublishTime = 0;				// The last time a MQTT publish was performed.
 unsigned long lastMqttConnectionTime = 0;		// The last time a MQTT connection was attempted.
+unsigned long lastWifiConnectTime = 0;			// The last time a Wi-Fi connection was attempted.
+unsigned long wifiCoolDownInterval = 10000;	// How long to wait between Wi-Fi connection attempts.
+unsigned long mqttCoolDownInterval = 10000;	// How long to wait between MQTT broker connection attempts.
+unsigned long printCount = 0;						// A counter of how many times the stats have been printed.
+
 
 #endif // LEGO_ESP32_SUN_TRACKER_H

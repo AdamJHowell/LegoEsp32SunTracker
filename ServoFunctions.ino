@@ -4,7 +4,7 @@
 /**
  * @brief The altitude servo is a full-rotation (360°) servo that needs to be constrained to keep the arm from rotating beyond 90°.
  * It is not a continuous-rotation servo.
- * The allowed range will be 0°-'altitudeMaxAngle'°.
+ * The allowed range will be from 0° to 'altitudeMaxAngle'°.
  * @param angle the angle to set the servo to.
  * Nothing in this function is blocking.
  */

@@ -28,44 +28,54 @@ void readTelemetry()
 void printTelemetry()
 {
 	Serial.println();
-	Serial.printf( "MAC address: %s\n", macAddress );
+	printCount++;
+	Serial.println( __FILE__ );
+	Serial.printf( "Print count %ld\n", printCount );
+	Serial.println();
+
+	Serial.println( "Network stats:" );
+	Serial.printf( "  MAC address: %s\n", macAddress );
 	int wifiStatusCode = WiFi.status();
 	char buffer[29];
 	lookupWifiCode( wifiStatusCode, buffer );
-	Serial.printf( "Wi-Fi status text: %s\n", buffer );
-	Serial.printf( "Wi-Fi status code: %d\n", wifiStatusCode );
 	if( wifiStatusCode == 3 )
 	{
-		Serial.printf( "IP address: %s\n", ipAddress );
-		Serial.printf( "RSSI: %ld\n", rssi );
+		Serial.printf( "  IP address: %s\n", ipAddress );
+		Serial.printf( "  RSSI: %ld\n", rssi );
+		Serial.print( "~~IP address: " );
+		Serial.println( WiFi.localIP() );
 	}
-	if( networkIndex != 2112 )
-	{
-		Serial.printf( "WiFi SSID: %s\n", wifiSsidArray[networkIndex] );
-		Serial.printf( "Broker: %s:%d\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex] );
-	}
+	Serial.printf( "  wifiConnectCount: %u\n", wifiConnectCount );
+	Serial.printf( "  wifiCoolDownInterval: %lu\n", wifiCoolDownInterval );
+	Serial.printf( "  Wi-Fi status text: %s\n", buffer );
+	Serial.printf( "  Wi-Fi status code: %d\n", wifiStatusCode );
+	Serial.println();
 
-	int mqttStateCode = mqttClient.state();
-	lookupMQTTCode( mqttStateCode, buffer );
-	Serial.printf( "MQTT state: %s\n", buffer );
-	Serial.printf( "Host  name: %s\n", HOST_NAME );
-	Serial.printf( "Sketch file name: %s\n", __FILE__ );
-	Serial.printf( "Notes: %s\n", NOTES );
-	Serial.printf( "Publish count: %ld\n", publishCount );
-	Serial.printf( "Altitude servo speed: %d\n", altitudeSpeed );
-	Serial.printf( "Azimuth servo speed: %d\n", azimuthSpeed );
+	Serial.println( "MQTT stats:" );
+	Serial.printf( "  mqttConnectCount: %u\n", mqttConnectCount );
+	Serial.printf( "  mqttCoolDownInterval: %lu\n", mqttCoolDownInterval );
+	Serial.printf( "  Broker: %s:%d\n", mqttClient.getServerDomain(), mqttClient.getServerPort() );
+	lookupMQTTCode( mqttClient.state(), buffer );
+	Serial.printf( "  MQTT state: %s\n", buffer );
+	Serial.printf( "  Publish count: %lu\n", publishCount );
+	Serial.printf( "  Callback count: %lu\n", callbackCount );
+	Serial.println();
+
+	Serial.println( "Device stats:" );
+	Serial.printf( "  Altitude servo speed: %d\n", altitudeSpeed );
+	Serial.printf( "  Azimuth servo speed: %d\n", azimuthSpeed );
 	Serial.println();
 	int upperSum = upperLeftValue + upperRightValue;
 	int lowerSum = lowerLeftValue + lowerRightValue;
 	int leftSum = upperLeftValue + lowerLeftValue;
 	int rightSum = upperRightValue + lowerRightValue;
-	Serial.println( "Analog readings:" );
-	Serial.printf( "╭──────┬──────╮\n" );
-	Serial.printf( "│ %4d │ %4d ├── %4d\n", upperLeftValue, upperRightValue, upperSum );
-	Serial.printf( "├──────┼──────┤\n" );
-	Serial.printf( "│ %4d │ %4d ├── %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
-	Serial.printf( "╰───┬──┴───┬──╯\n" );
-	Serial.printf( "    │      │\n" );
+	Serial.println( "  Analog readings:" );
+	Serial.printf( " ------|------\n" );
+	Serial.printf( "| %4d | %4d |-- %4d\n", upperLeftValue, upperRightValue, upperSum );
+	Serial.printf( "|------|------|\n" );
+	Serial.printf( "| %4d | %4d |-- %4d\n", lowerLeftValue, lowerRightValue, lowerSum );
+	Serial.printf( " ---|--|---|--\n" );
+	Serial.printf( "    |      |\n" );
 	Serial.printf( "  %4d   %4d\n", leftSum, rightSum );
 	Serial.println();
 
@@ -91,6 +101,9 @@ void printTelemetry()
 	}
 	else
 		Serial.println( "Azimuth hold!" );
+
+	Serial.printf( "Next telemetry poll in %lu seconds\n", telemetryPrintInterval / MILLIS_IN_SEC );
+	Serial.println( "\n" );
 } // End of printTelemetry() function.
 
 
@@ -129,7 +142,7 @@ void setup()
 	// Set GPIO 2 (MCU_LED) as an output.
 	pinMode( MCU_LED, OUTPUT );
 	// Turn the LED on.
-	digitalWrite( MCU_LED, 1 );
+	digitalWrite( MCU_LED, LED_ON );
 
 	// Set the MAC address variable to its value.
 	snprintf( macAddress, 18, "%s", WiFi.macAddress().c_str() );
@@ -148,10 +161,10 @@ void setup()
  */
 void toggleLED()
 {
-	if( digitalRead( MCU_LED ) != 1 )
-		digitalWrite( MCU_LED, 1 );
+	if( digitalRead( MCU_LED ) != LED_ON )
+		digitalWrite( MCU_LED, LED_ON );
 	else
-		digitalWrite( MCU_LED, 0 );
+		digitalWrite( MCU_LED, LED_OFF );
 } // End of toggleLED() function.
 
 
@@ -186,7 +199,7 @@ void loop()
 			if( mqttClient.state() != 0 )
 				toggleLED();
 			else
-				digitalWrite( MCU_LED, 1 );
+				digitalWrite( MCU_LED, LED_ON );
 		}
 	}
 
