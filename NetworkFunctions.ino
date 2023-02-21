@@ -73,8 +73,6 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 				else
 					Serial.printf( "The 'moveServo' command requires the 'servoName' property to be set!" );
 			}
-			else if( strcmp( command, "publishStats" ) == 0 )
-				publishStats();
 			else
 				Serial.printf( "Unknown command: '%s'\n", command );
 		}
@@ -332,7 +330,6 @@ int mqttMultiConnect( int maxAttempts )
 						Serial.println( "Restarting the device!" );
 						ESP.restart();
 					}
-					publishStats();
 					// Subscribe to the command topic.
 					if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
 						Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
@@ -374,48 +371,6 @@ int mqttMultiConnect( int maxAttempts )
 	lastMqttConnectionTime = millis();
 	return 1;
 } // End of mqttMultiConnect() function.
-
-
-/**
- * @brief publishStats() is called by the callback when the "publishStats" command is received.
- */
-void publishStats()
-{
-	if( mqttClient.connected() )
-	{
-		readTelemetry();
-		char mqttStatsString[JSON_DOC_SIZE];
-		// Create a JSON Document on the stack.
-		StaticJsonDocument<JSON_DOC_SIZE> statsJsonDoc;
-		// Add data: SKETCH_NAME, macAddress, ipAddress, rssi, publishCount
-		statsJsonDoc["sketch"] = SKETCH_NAME;
-		statsJsonDoc["mac"] = macAddress;
-		statsJsonDoc["ip"] = ipAddress;
-		statsJsonDoc["rssi"] = rssi;
-		statsJsonDoc["publishCount"] = publishCount;
-
-		// Serialize statsJsonDoc into mqttStatsString, with indentation and line breaks.
-		serializeJsonPretty( statsJsonDoc, mqttStatsString );
-
-		Serial.printf( "Publishing stats to the '%s' topic.\n", MQTT_STATS_TOPIC );
-
-		if( mqttClient.publish( MQTT_STATS_TOPIC, mqttStatsString ) )
-		{
-			Serial.printf( "Published to this broker: '%s:%d' on this topic '%s'.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], MQTT_STATS_TOPIC );
-			Serial.println( mqttStatsString );
-		}
-		else
-			Serial.print( "\n\nPublish failed!\n\n" );
-	}
-} // End of publishStats() function.
-
-
-/**
- * @brief publishTelemetry() will publish basic device information to the MQTT broker.
- */
-void publishTelemetry()
-{
-} // End of publishTelemetry() function.
 
 
 /**
