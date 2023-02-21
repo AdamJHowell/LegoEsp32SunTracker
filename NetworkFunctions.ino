@@ -82,56 +82,25 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 
 /**
  * @brief configureOTA() will configure and initiate Over The Air (OTA) updates for this device.
- *
  */
 void configureOTA()
 {
-	Serial.println( "Configuring OTA." );
-
 #ifdef ESP8266
-	// The ESP8266 hostname defaults to esp8266-[ChipID].
-	// The ESP8266 port defaults to 8266.
-	// ArduinoOTA.setPort( 8266 );
-	// Authentication is disabled by default.
-	// ArduinoOTA.setPassword( ( const char * ) "admin" );
-#elif ESP32
-	// The ESP32 hostname defaults to esp32-[MAC].
-	// The ESP32 port defaults to 3232.
-	// ArduinoOTA.setPort( 3232 );
-	// Authentication is disabled by default.
-	// ArduinoOTA.setPassword( "admin" );
-	// Password can be set with it's md5 value as well.
-	// MD5( admin ) = 21232f297a57a5a743894a0e4a801fc3.
-	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
-#else
-	// ToDo: Verify how stock Arduino code is meant to handle the port, username, and password.
-#endif
+	Serial.println( "Configuring OTA for the ESP8266" );
+	// Port defaults to 8266
+	// ArduinoOTA.setPort(8266);
 
-	// ArduinoOTA is a class-defined object.
-	ArduinoOTA.setHostname( HOST_NAME );
+	// Hostname defaults to esp8266-[ChipID]
+	ArduinoOTA.setHostname( hostName );
 
-	Serial.printf( "Using hostname '%s'\n", HOST_NAME );
+	// No authentication by default
+	ArduinoOTA.setPassword( otaPass );
 
-	String type = "filesystem"; // SPIFFS
-	if( ArduinoOTA.getCommand() == U_FLASH )
-		type = "sketch";
+	// Password can be set with it's md5 value as well
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
-	// Configure the OTA callbacks.
-	// Port defaults to 8266.
-	// ArduinoOTA.setPort( 8266 );
-
-	// Hostname defaults to esp8266-[ChipID].
-	// ArduinoOTA.setHostname( "myesp8266" );
-
-	// No authentication by default.
-	// ArduinoOTA.setPassword( "admin" );
-
-	// Password can be set with it's md5 value as well.
-	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3.
-	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
-
-	ArduinoOTA.onStart( []()
-							  {
+	ArduinoOTA.onStart( []() {
 								  String type;
 								  if( ArduinoOTA.getCommand() == U_FLASH )
 									  type = "sketch";
@@ -139,19 +108,62 @@ void configureOTA()
 									  type = "filesystem";
 
 								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-								  Serial.println( "Start updating " + type ); } );
-	ArduinoOTA.onEnd( []()
-							{ Serial.println( "\nEnd" ); } );
-	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total )
-								  { Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
-	ArduinoOTA.onError( []( ota_error_t error )
-							  {
+								  Serial.println( "Start updating " + type );
+							  } );
+	ArduinoOTA.onEnd( []() {
+								Serial.println( "\nEnd" );
+							} );
+	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total ) {
+									  Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) );
+								  } );
+	ArduinoOTA.onError( []( ota_error_t error ) {
 								  Serial.printf( "Error[%u]: ", error );
 								  if( error == OTA_AUTH_ERROR ) Serial.println( "Auth Failed" );
-								  else if( error == OTA_BEGIN_ERROR ) Serial.println( "Begin Failed" );
-								  else if( error == OTA_CONNECT_ERROR ) Serial.println( "Connect Failed" );
-								  else if( error == OTA_RECEIVE_ERROR ) Serial.println( "Receive Failed" );
-								  else if( error == OTA_END_ERROR ) Serial.println( "End Failed" ); } );
+								  else if( error == OTA_BEGIN_ERROR )
+									  Serial.println( "Begin Failed" );
+								  else if( error == OTA_CONNECT_ERROR )
+									  Serial.println( "Connect Failed" );
+								  else if( error == OTA_RECEIVE_ERROR )
+									  Serial.println( "Receive Failed" );
+								  else if( error == OTA_END_ERROR )
+									  Serial.println( "End Failed" );
+							  } );
+#else
+	Serial.println( "Configuring OTA for the ESP32" );
+	// The ESP32 port defaults to 3232
+	// ArduinoOTA.setPort( 3232 );
+	// The ESP32 hostname defaults to esp32-[MAC]
+	//	ArduinoOTA.setHostname( hostName );  // I'm deliberately using the default.
+	// Authentication is disabled by default.
+	ArduinoOTA.setPassword( otaPass );
+	// Password can be set with it's md5 value as well
+	// MD5( admin ) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash( "21232f297a57a5a743894a0e4a801fc3" );
+	//	Serial.printf( "Using hostname '%s'\n", hostName );
+
+	String type = "filesystem"; // SPIFFS
+	if( ArduinoOTA.getCommand() == U_FLASH )
+		type = "sketch";
+
+	// Configure the OTA callbacks.
+	ArduinoOTA.onStart( []() {
+								  String type = "flash"; // U_FLASH
+								  if( ArduinoOTA.getCommand() == U_SPIFFS )
+									  type = "filesystem";
+								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+								  Serial.print( "OTA is updating the " );
+								  Serial.println( type );
+							  } );
+	ArduinoOTA.onEnd( []() { Serial.println( "\nTerminating OTA communication." ); } );
+	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total ) { Serial.printf( "OTA progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
+	ArduinoOTA.onError( []( ota_error_t error ) {
+								  Serial.printf( "Error[%u]: ", error );
+								  if( error == OTA_AUTH_ERROR ) Serial.println( "OTA authentication failed!" );
+								  else if( error == OTA_BEGIN_ERROR ) Serial.println( "OTA transmission failed to initiate properly!" );
+								  else if( error == OTA_CONNECT_ERROR ) Serial.println( "OTA connection failed!" );
+								  else if( error == OTA_RECEIVE_ERROR ) Serial.println( "OTA client was unable to properly receive data!" );
+								  else if( error == OTA_END_ERROR ) Serial.println( "OTA transmission failed to terminate properly!" ); } );
+#endif
 
 	// Start listening for OTA commands.
 	ArduinoOTA.begin();
@@ -160,29 +172,30 @@ void configureOTA()
 } // End of the configureOTA() function.
 
 
-/*
- * checkForSSID() is used by wifiMultiConnect() to avoid attempting to connect to SSIDs which are not in range.
- * Returns 1 if 'ssidName' can be found.
- * Returns 0 if 'ssidName' cannot be found.
+/**
+ * @brief checkForSSID() will scan for all visible SSIDs, see if any match 'ssidName',
+ * and return a count of how many matches were found.
+ *
+ * @param ssidName the SSID name to search for.
+ * @return int the count of SSIDs which match the passed parameter.
  */
 int checkForSSID( const char *ssidName )
 {
+	int ssidCount = 0;
 	byte networkCount = WiFi.scanNetworks();
 	if( networkCount == 0 )
 		Serial.println( "No WiFi SSIDs are in range!" );
 	else
 	{
-		Serial.printf( "%d networks found.\n", networkCount );
+		//      Serial.printf( "WiFi SSIDs in range: %d\n", networkCount );
 		for( int i = 0; i < networkCount; ++i )
 		{
 			// Check to see if this SSID matches the parameter.
 			if( strcmp( ssidName, WiFi.SSID( i ).c_str() ) == 0 )
-				return 1;
-			// Alternately, the String compareTo() function can be used like this: if( WiFi.SSID( i ).compareTo( ssidName ) == 0 )
+				ssidCount++;
 		}
 	}
-	Serial.printf( "SSID '%s' was not found!\n", ssidName );
-	return 0;
+	return ssidCount;
 } // End of checkForSSID() function.
 
 
