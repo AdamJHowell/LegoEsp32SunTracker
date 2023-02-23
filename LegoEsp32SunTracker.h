@@ -30,12 +30,12 @@
  * Function declarations.
  */
 // NetworkFunctions.ino
-void onReceiveCallback( char *topic, byte *payload, unsigned int length );
+void mqttCallback( char *topic, byte *payload, unsigned int length );
 void configureOTA();
 int checkForSSID( const char *ssidName );
 bool wifiConnect( const char *ssid, const char *password );
 void wifiMultiConnect();
-int mqttMultiConnect( int maxAttempts );
+bool mqttMultiConnect( int maxAttempts );
 void publishStats();
 void publishTelemetry();
 void lookupWifiCode( int code, char *buffer );

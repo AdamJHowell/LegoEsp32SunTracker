@@ -1,6 +1,6 @@
 /**
  * @brief The purpose of this file is to hold network-related functions which are device-agnostic.
- * This is not realistic because of the presence of onReceiveCallback.
+ * This is not realistic because of the presence of mqttCallback.
  * Ideally, this file could be used by an ESP32, ESP8266, or similar boards.
  * Because memory capacity varies wildly from device to device, buffer sizes are declared as variables in the entry-point file.
  */
@@ -8,10 +8,10 @@
 
 
 /**
- * onReceiveCallback() handles MQTT subscriptions.
+ * mqttCallback() handles MQTT subscriptions.
  * When a message comes in on a topic we have subscribed to, this function is executed.
  */
-void onReceiveCallback( char *topic, byte *payload, unsigned int length )
+void mqttCallback( char *topic, byte *payload, unsigned int length )
 {
 	Serial.printf( "New message on topic '%s'\n", topic );
 	// ToDo: Determine which commands this device should respond to.
@@ -77,7 +77,7 @@ void onReceiveCallback( char *topic, byte *payload, unsigned int length )
 				Serial.printf( "Unknown command: '%s'\n", command );
 		}
 	}
-} // End of onReceiveCallback() function.
+} // End of mqttCallback() function.
 
 
 /**
@@ -100,7 +100,8 @@ void configureOTA()
 	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
 	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
-	ArduinoOTA.onStart( []() {
+	ArduinoOTA.onStart( []()
+							  {
 								  String type;
 								  if( ArduinoOTA.getCommand() == U_FLASH )
 									  type = "sketch";
@@ -108,15 +109,13 @@ void configureOTA()
 									  type = "filesystem";
 
 								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-								  Serial.println( "Start updating " + type );
-							  } );
-	ArduinoOTA.onEnd( []() {
-								Serial.println( "\nEnd" );
-							} );
-	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total ) {
-									  Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) );
-								  } );
-	ArduinoOTA.onError( []( ota_error_t error ) {
+								  Serial.println( "Start updating " + type ); } );
+	ArduinoOTA.onEnd( []()
+							{ Serial.println( "\nEnd" ); } );
+	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total )
+								  { Serial.printf( "Progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
+	ArduinoOTA.onError( []( ota_error_t error )
+							  {
 								  Serial.printf( "Error[%u]: ", error );
 								  if( error == OTA_AUTH_ERROR ) Serial.println( "Auth Failed" );
 								  else if( error == OTA_BEGIN_ERROR )
@@ -126,8 +125,7 @@ void configureOTA()
 								  else if( error == OTA_RECEIVE_ERROR )
 									  Serial.println( "Receive Failed" );
 								  else if( error == OTA_END_ERROR )
-									  Serial.println( "End Failed" );
-							  } );
+									  Serial.println( "End Failed" ); } );
 #else
 	Serial.println( "Configuring OTA for the ESP32" );
 	// The ESP32 port defaults to 3232
@@ -146,17 +144,20 @@ void configureOTA()
 		type = "sketch";
 
 	// Configure the OTA callbacks.
-	ArduinoOTA.onStart( []() {
+	ArduinoOTA.onStart( []()
+							  {
 								  String type = "flash"; // U_FLASH
 								  if( ArduinoOTA.getCommand() == U_SPIFFS )
 									  type = "filesystem";
 								  // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
 								  Serial.print( "OTA is updating the " );
-								  Serial.println( type );
-							  } );
-	ArduinoOTA.onEnd( []() { Serial.println( "\nTerminating OTA communication." ); } );
-	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total ) { Serial.printf( "OTA progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
-	ArduinoOTA.onError( []( ota_error_t error ) {
+								  Serial.println( type ); } );
+	ArduinoOTA.onEnd( []()
+							{ Serial.println( "\nTerminating OTA communication." ); } );
+	ArduinoOTA.onProgress( []( unsigned int progress, unsigned int total )
+								  { Serial.printf( "OTA progress: %u%%\r", ( progress / ( total / 100 ) ) ); } );
+	ArduinoOTA.onError( []( ota_error_t error )
+							  {
 								  Serial.printf( "Error[%u]: ", error );
 								  if( error == OTA_AUTH_ERROR ) Serial.println( "OTA authentication failed!" );
 								  else if( error == OTA_BEGIN_ERROR ) Serial.println( "OTA transmission failed to initiate properly!" );
@@ -236,6 +237,7 @@ bool wifiConnect( const char *ssid, const char *password )
 	return false;
 } // End of the wifiConnect() function.
 
+
 /**
  * @brief wifiMultiConnect() will iterate through the SSIDs in 'wifiSsidList[]', and then use checkForSSID() determine which are in range.
  * When a SSID is in range, wifiConnect() will be called with that SSID and password.
@@ -284,75 +286,59 @@ void wifiMultiConnect()
 
 /*
  * mqttMultiConnect() will:
- * 1. Check the Wi-Fi connection, and reconnect Wi-Fi as needed.
+ * 1. Check the WiFi connection, and reconnect WiFi as needed.
  * 2. Attempt to connect the MQTT client designated in 'mqttBrokerArray[networkIndex]' up to 'maxAttempts' number of times.
- * 3. Subscribe to the topic defined in 'MQTT_COMMAND_TOPIC'.
+ * 3. Subscribe to the topic defined in 'commandTopic'.
  * If the broker connection cannot be made, an error will be printed to the serial port.
  */
-int mqttMultiConnect( int maxAttempts )
+bool mqttMultiConnect( int maxAttempts )
 {
-	unsigned long time = millis();
-	// Connect the first time.  Avoid subtraction overflow.  Connect every interval.
-	if( lastMqttConnectionTime == 0 || ( ( time > mqttReconnectCooldown ) && ( time - mqttReconnectCooldown ) > lastMqttConnectionTime ) )
+	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
+	if( WiFi.status() != WL_CONNECTED )
+		wifiMultiConnect();
+
+	mqttClient.setCallback( mqttCallback );
+	/*
+	 * The networkIndex variable is initialized to 2112.
+	 * If it is still 2112 at this point, then WiFi failed to connect.
+	 * This is only needed to display the name and port of the broker being used.
+	 */
+	if( networkIndex != 2112 )
+		Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], maxAttempts );
+	else
+		Serial.printf( "Attempting to connect to the MQTT broker up to %d times.\n", maxAttempts );
+
+
+	int attemptNumber = 0;
+	// Loop until MQTT has connected.
+	while( !mqttClient.connected() && attemptNumber < maxAttempts )
 	{
-		digitalWrite( MCU_LED, LED_OFF );
-		Serial.println( "\nFunction mqttMultiConnect() has initiated." );
-		if( WiFi.status() != WL_CONNECTED )
-			wifiMultiConnect();
-		else
-			Serial.printf( "Wi-Fi is already connected with client address %s\n", ipAddress );
-
-		/*
-		 * The networkIndex variable is initialized to 2112.
-		 * If it is still 2112 at this point, then Wi-Fi failed to connect.
-		 * This is only needed to display the name and port of the broker being used.
-		 */
-		if( networkIndex != 2112 )
+		// Put the macAddress and random number into clientId.
+		char clientId[22];
+		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
+		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
+		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
+		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
+		if( mqttClient.connect( clientId ) )
 		{
-			const char *mqttBroker = mqttBrokerArray[networkIndex];
-			const int mqttPort = mqttPortArray[networkIndex];
-			Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBroker, mqttPort, maxAttempts );
-
-			// Set the MQTT client parameters.
-			mqttClient.setServer( mqttBroker, mqttPort );
-			// Assign the onReceiveCallback() function to handle MQTT callbacks.
-			mqttClient.setCallback( onReceiveCallback );
-			Serial.printf( "Using MQTT broker: %s\n", mqttBroker );
-			Serial.printf( "Using MQTT port: %d\n", mqttPort );
-
-
-			int attemptNumber = 0;
-			// Loop until MQTT has connected.
-			while( !mqttClient.connected() && attemptNumber < maxAttempts )
+			Serial.println( " connected." );
+			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
 			{
-				// Put the macAddress and random number into clientId.
-				char clientId[22];
-				//		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
-				snprintf( clientId, 19, "%s", macAddress );
-				// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
-				Serial.printf( "Connecting with client ID '%s'.\n", clientId );
-				Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
-				// Connect with the client ID and a "clean" (non-persistent) session.
-				if( mqttClient.connect( clientId ) )
-				{
-					Serial.println( " connected." );
-					digitalWrite( MCU_LED, LED_ON );
-					if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
-					{
-						Serial.printf( "Unable to create a buffer %lu bytes long!\n", JSON_DOC_SIZE );
-						Serial.println( "Restarting the device!" );
-						ESP.restart();
-					}
-					// Subscribe to the command topic.
-					if( mqttClient.subscribe( MQTT_COMMAND_TOPIC ) )
-						Serial.printf( "Successfully subscribed to topic '%s'.\n", MQTT_COMMAND_TOPIC );
-					else
-						Serial.printf( "Failed to subscribe to topic '%s'!\n", MQTT_COMMAND_TOPIC );
-				}
-				else
-				{
-					int mqttState = mqttClient.state();
-					/*
+				Serial.printf( "Unable to create a buffer %d bytes long!\n", JSON_DOC_SIZE );
+				Serial.println( "Restarting the device!" );
+				ESP.restart();
+			}
+			publishStats();
+			// Subscribe to the command topic.
+			if( mqttClient.subscribe( commandTopic ) )
+				Serial.printf( "Successfully subscribed to topic '%s'.\n", commandTopic );
+			else
+				Serial.printf( "Failed to subscribe to topic '%s'!\n", commandTopic );
+		}
+		else
+		{
+			int mqttState = mqttClient.state();
+			/*
 				Possible values for client.state():
 				MQTT_CONNECTION_TIMEOUT     -4		// Note: This also comes up when the clientID is already in use.
 				MQTT_CONNECTION_LOST        -3
@@ -365,24 +351,28 @@ int mqttMultiConnect( int maxAttempts )
 				MQTT_CONNECT_BAD_CREDENTIALS 4
 				MQTT_CONNECT_UNAUTHORIZED    5
 			*/
-					Serial.printf( " failed!  Return code: %d", mqttState );
-					if( mqttState == -4 )
-						Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
-					else if( mqttState == 2 )
-						Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
-					else
-						Serial.println( "" );
+			Serial.printf( " failed!  Return code: %d", mqttState );
+			if( mqttState == -4 )
+				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
+			else if( mqttState == 2 )
+				Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
+			else
+				Serial.println( "" );
 
-					Serial.printf( "Trying again in %u seconds.\n\n", mqttReconnectInterval / 1000 );
-					delay( mqttReconnectInterval );
-				}
-				attemptNumber++;
-			}
+			Serial.printf( "Trying again in %lu seconds.\n\n", mqttReconnectInterval / 1000 );
+			delay( mqttReconnectInterval );
 		}
-		Serial.println( "Function mqttMultiConnect() has completed.\n" );
+		attemptNumber++;
 	}
-	lastMqttConnectionTime = millis();
-	return 1;
+
+	if( !mqttClient.connected() )
+	{
+		Serial.println( "Unable to connect to the MQTT broker!" );
+		return false;
+	}
+
+	Serial.println( "Function mqttMultiConnect() has completed.\n" );
+	return true;
 } // End of mqttMultiConnect() function.
 
 

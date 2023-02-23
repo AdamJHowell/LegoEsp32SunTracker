@@ -172,6 +172,7 @@ void loop()
 {
 	// Process OTA requests.
 	ArduinoOTA.handle();
+
 	unsigned long time = millis();
 	// Poll the first time.  Avoid subtraction overflow.  Poll every interval.
 	if( lastTelemetryPollTime == 0 || ( ( time > telemetryPollInterval ) && ( time - telemetryPollInterval ) > lastTelemetryPollTime ) )
