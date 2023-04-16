@@ -136,30 +136,30 @@ void moveArm()
 	if( abs( leftSum - rightSum ) > 1000 )
 	{
 		if( leftSum > rightSum )
-			azimuthSpeed = -100;
-		else
 			azimuthSpeed = 100;
+		else
+			azimuthSpeed = -100;
 	}
 	else if( abs( leftSum - rightSum ) > 800 )
 	{
 		if( leftSum > rightSum )
-			azimuthSpeed = -50;
-		else
 			azimuthSpeed = 50;
+		else
+			azimuthSpeed = -50;
 	}
 	else if( abs( leftSum - rightSum ) > 100 )
 	{
 		if( leftSum > rightSum )
-			azimuthSpeed = -30;
-		else
 			azimuthSpeed = 30;
+		else
+			azimuthSpeed = -30;
 	}
 	else if( abs( leftSum - rightSum ) > 50 )
 	{
 		if( leftSum > rightSum )
-			azimuthSpeed = -15;
-		else
 			azimuthSpeed = 15;
+		else
+			azimuthSpeed = -15;
 	}
 	else
 		azimuthSpeed = 0;
