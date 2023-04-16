@@ -2,8 +2,7 @@
 
 
 /**
- * @brief The altitude servo is a full-rotation (360°) servo that needs to be constrained to keep the arm from rotating beyond 90°.
- * It is not a continuous-rotation servo.
+ * @brief The altitude servo is a continuous-rotation servo that needs to be constrained to keep the arm from rotating beyond 90°.
  * The allowed range will be from 0° to 'altitudeMaxAngle'°.
  * @param angle the angle to set the servo to.
  * Nothing in this function is blocking.
@@ -97,30 +96,30 @@ void moveArm()
 	if( abs( upperSum - lowerSum ) > 1000 )
 	{
 		if( upperSum > lowerSum )
-			altitudeSpeed = -100;
+			altitudeSpeed = -30;
 		else
-			altitudeSpeed = 100;
+			altitudeSpeed = 30;
 	}
 	else if( abs( upperSum - lowerSum ) > 700 )
-	{
-		if( upperSum > lowerSum )
-			altitudeSpeed = -70;
-		else
-			altitudeSpeed = 70;
-	}
-	else if( abs( upperSum - lowerSum ) > 100 )
-	{
-		if( upperSum > lowerSum )
-			altitudeSpeed = -40;
-		else
-			altitudeSpeed = 40;
-	}
-	else if( abs( upperSum - lowerSum ) > 50 )
 	{
 		if( upperSum > lowerSum )
 			altitudeSpeed = -20;
 		else
 			altitudeSpeed = 20;
+	}
+	else if( abs( upperSum - lowerSum ) > 100 )
+	{
+		if( upperSum > lowerSum )
+			altitudeSpeed = -10;
+		else
+			altitudeSpeed = 10;
+	}
+	else if( abs( upperSum - lowerSum ) > 50 )
+	{
+		if( upperSum > lowerSum )
+			altitudeSpeed = -5;
+		else
+			altitudeSpeed = 5;
 	}
 	// Don't allow upwards movement if the inclination limit switch is shorted to ground.
 	if( altitudeSpeed > 0 && digitalRead( inclinationStopPin ) == 0 )

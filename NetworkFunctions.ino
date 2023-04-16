@@ -8,79 +8,6 @@
 
 
 /**
- * mqttCallback() handles MQTT subscriptions.
- * When a message comes in on a topic we have subscribed to, this function is executed.
- */
-void mqttCallback( char *topic, byte *payload, unsigned int length )
-{
-	Serial.printf( "New message on topic '%s'\n", topic );
-	// ToDo: Determine which commands this device should respond to.
-	//{
-	//"command":   "moveServo",
-	//"servoName": "altitude",
-	//"value":     42
-	//}
-	//
-	//{
-	//"command":   "moveServo",
-	//"servoName": "azimuth",
-	//"value":     -42
-	//}
-	// void moveServo( Servo servoToMove, int pwm );
-	// digitalWrite( MCU_LED, LED_ON );
-	if( length > 0 )
-	{
-		callbackCount++;
-		// Create a document named callbackJsonDoc to hold the callback payload.
-		StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
-		// Deserialize payload into callbackJsonDoc.
-		deserializeJson( callbackJsonDoc, payload, length );
-
-		if( callbackJsonDoc.containsKey( "command" ) )
-		{
-			// Store the command value.
-			const char *command = callbackJsonDoc["command"];
-
-			// Available commands are: moveServo and publishStats.
-			if( strcmp( command, "moveServo" ) == 0 )
-			{
-				if( callbackJsonDoc.containsKey( "servoName" ) )
-				{
-					const char *servoName = callbackJsonDoc["servoName"];
-					if( strcmp( servoName, "azimuth" ) == 0 )
-					{
-						if( callbackJsonDoc.containsKey( "value" ) )
-						{
-							azimuthSpeed = callbackJsonDoc["value"];
-							setAzimuthSpeed( azimuthSpeed );
-						}
-						else
-							Serial.printf( "The 'moveServo' command requires the 'value' property to be set!" );
-					}
-					else if( strcmp( servoName, "altitude" ) == 0 )
-					{
-						if( callbackJsonDoc.containsKey( "value" ) )
-						{
-							altitudeSpeed = callbackJsonDoc["value"];
-							setAltitude( altitudeSpeed );
-						}
-						else
-							Serial.printf( "The 'moveServo' command requires the 'value' property to be set!" );
-					}
-					else
-						Serial.printf( "Unknown servo name '%s'\n", servoName );
-				}
-				else
-					Serial.printf( "The 'moveServo' command requires the 'servoName' property to be set!" );
-			}
-			else
-				Serial.printf( "Unknown command: '%s'\n", command );
-		}
-	}
-} // End of mqttCallback() function.
-
-
-/**
  * @brief configureOTA() will configure and initiate Over The Air (OTA) updates for this device.
  */
 void configureOTA()
@@ -207,7 +134,7 @@ bool wifiConnect( const char *ssid, const char *password )
 {
 	wifiConnectCount++;
 	// Turn the LED off to show Wi-Fi is not connected.
-	digitalWrite( MCU_LED, LED_OFF );
+	digitalWrite( ONBOARD_LED, LED_OFF );
 
 	Serial.printf( "Attempting to connect to Wi-Fi SSID '%s'", ssid );
 	WiFi.mode( WIFI_STA );
@@ -230,7 +157,7 @@ bool wifiConnect( const char *ssid, const char *password )
 		Serial.println( "Wi-Fi connection established!" );
 		snprintf( ipAddress, 16, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
 		// Turn the LED on to show that Wi-Fi is connected.
-		digitalWrite( MCU_LED, LED_ON );
+		digitalWrite( ONBOARD_LED, LED_ON );
 		return true;
 	}
 	Serial.println( "Wi-Fi failed to connect in the timeout period.\n" );
@@ -239,7 +166,7 @@ bool wifiConnect( const char *ssid, const char *password )
 
 
 /**
- * @brief wifiMultiConnect() will iterate through the SSIDs in 'wifiSsidList[]', and then use checkForSSID() determine which are in range.
+ * @brief wifiMultiConnect() will iterate through the SSIDs in 'wifiSsidArray[]', and then use checkForSSID() determine which are in range.
  * When a SSID is in range, wifiConnect() will be called with that SSID and password.
  */
 void wifiMultiConnect()
@@ -248,8 +175,8 @@ void wifiMultiConnect()
 	if( lastWifiConnectTime == 0 || ( time > wifiCoolDownInterval && ( time - wifiCoolDownInterval ) > lastWifiConnectTime ) )
 	{
 		Serial.println( "\nEntering wifiMultiConnect()" );
-		digitalWrite( MCU_LED, LED_OFF ); // Turn the LED off to show that Wi-Fi is not yet connected.
-		for( size_t networkArrayIndex = 0; networkArrayIndex < sizeof( wifiSsidArray ); networkArrayIndex++ )
+		digitalWrite( ONBOARD_LED, LED_OFF ); // Turn the LED off to show that Wi-Fi is not yet connected.
+		for( unsigned int networkArrayIndex = 0; networkArrayIndex < ELEMENT_COUNT; networkArrayIndex++ )
 		{
 			// Get the details for this connection attempt.
 			const char *wifiSsid = wifiSsidArray[networkArrayIndex];
@@ -262,118 +189,26 @@ void wifiMultiConnect()
 
 			// Don't even try to connect if the SSID cannot be found.
 			int ssidCount = checkForSSID( wifiSsid );
-			if( ssidCount > 0 )
+			if( ssidCount < 1 )
 			{
-				// This is useful for detecting multiples APs.
-				if( ssidCount > 1 )
-					Serial.printf( "Found %d SSIDs matching '%s'.\n", ssidCount, wifiSsid );
-
-				// If the Wi-Fi connection is successful, set the mqttClient broker parameters.
-				if( wifiConnect( wifiSsid, wifiPassword ) )
-				{
-					mqttClient.setServer( mqttBrokerArray[networkArrayIndex], mqttPortArray[networkArrayIndex] );
-					return;
-				}
-			}
-			else
 				Serial.printf( "Network '%s' was not found!\n\n", wifiSsid );
+				return;
+			}
+			// This is useful for detecting multiples APs.
+			if( ssidCount > 1 )
+				Serial.printf( "Found %d SSIDs matching '%s'.\n", ssidCount, wifiSsid );
+
+			// If the Wi-Fi connection is successful, set the mqttClient broker parameters.
+			if( wifiConnect( wifiSsid, wifiPassword ) )
+			{
+				mqttClient.setServer( mqttBrokerArray[networkArrayIndex], mqttPortArray[networkArrayIndex] );
+				break;
+			}
 		}
 		Serial.println( "Exiting wifiMultiConnect()\n" );
 		lastWifiConnectTime = millis();
 	}
 } // End of wifiMultiConnect() function.
-
-
-/*
- * mqttMultiConnect() will:
- * 1. Check the WiFi connection, and reconnect WiFi as needed.
- * 2. Attempt to connect the MQTT client designated in 'mqttBrokerArray[networkIndex]' up to 'maxAttempts' number of times.
- * 3. Subscribe to the topic defined in 'commandTopic'.
- * If the broker connection cannot be made, an error will be printed to the serial port.
- */
-bool mqttMultiConnect( int maxAttempts )
-{
-	Serial.println( "\nFunction mqttMultiConnect() has initiated." );
-	if( WiFi.status() != WL_CONNECTED )
-		wifiMultiConnect();
-
-	mqttClient.setCallback( mqttCallback );
-	/*
-	 * The networkIndex variable is initialized to 2112.
-	 * If it is still 2112 at this point, then WiFi failed to connect.
-	 * This is only needed to display the name and port of the broker being used.
-	 */
-	if( networkIndex != 2112 )
-		Serial.printf( "Attempting to connect to the MQTT broker at '%s:%d' up to %d times.\n", mqttBrokerArray[networkIndex], mqttPortArray[networkIndex], maxAttempts );
-	else
-		Serial.printf( "Attempting to connect to the MQTT broker up to %d times.\n", maxAttempts );
-
-
-	int attemptNumber = 0;
-	// Loop until MQTT has connected.
-	while( !mqttClient.connected() && attemptNumber < maxAttempts )
-	{
-		// Put the macAddress and random number into clientId.
-		char clientId[22];
-		snprintf( clientId, 22, "%s-%03ld", macAddress, random( 999 ) );
-		// Connect to the broker using the MAC address for a clientID.  This guarantees that the clientID is unique.
-		Serial.printf( "Connecting with client ID '%s'.\n", clientId );
-		Serial.printf( "Attempt # %d....", ( attemptNumber + 1 ) );
-		if( mqttClient.connect( clientId ) )
-		{
-			Serial.println( " connected." );
-			if( !mqttClient.setBufferSize( JSON_DOC_SIZE ) )
-			{
-				Serial.printf( "Unable to create a buffer %d bytes long!\n", JSON_DOC_SIZE );
-				Serial.println( "Restarting the device!" );
-				ESP.restart();
-			}
-			publishStats();
-			// Subscribe to the command topic.
-			if( mqttClient.subscribe( commandTopic ) )
-				Serial.printf( "Successfully subscribed to topic '%s'.\n", commandTopic );
-			else
-				Serial.printf( "Failed to subscribe to topic '%s'!\n", commandTopic );
-		}
-		else
-		{
-			int mqttState = mqttClient.state();
-			/*
-				Possible values for client.state():
-				MQTT_CONNECTION_TIMEOUT     -4		// Note: This also comes up when the clientID is already in use.
-				MQTT_CONNECTION_LOST        -3
-				MQTT_CONNECT_FAILED         -2
-				MQTT_DISCONNECTED           -1
-				MQTT_CONNECTED               0
-				MQTT_CONNECT_BAD_PROTOCOL    1
-				MQTT_CONNECT_BAD_CLIENT_ID   2
-				MQTT_CONNECT_UNAVAILABLE     3
-				MQTT_CONNECT_BAD_CREDENTIALS 4
-				MQTT_CONNECT_UNAUTHORIZED    5
-			*/
-			Serial.printf( " failed!  Return code: %d", mqttState );
-			if( mqttState == -4 )
-				Serial.println( " - MQTT_CONNECTION_TIMEOUT" );
-			else if( mqttState == 2 )
-				Serial.println( " - MQTT_CONNECT_BAD_CLIENT_ID" );
-			else
-				Serial.println( "" );
-
-			Serial.printf( "Trying again in %lu seconds.\n\n", mqttReconnectInterval / 1000 );
-			delay( mqttReconnectInterval );
-		}
-		attemptNumber++;
-	}
-
-	if( !mqttClient.connected() )
-	{
-		Serial.println( "Unable to connect to the MQTT broker!" );
-		return false;
-	}
-
-	Serial.println( "Function mqttMultiConnect() has completed.\n" );
-	return true;
-} // End of mqttMultiConnect() function.
 
 
 /**
@@ -451,3 +286,103 @@ void lookupMQTTCode( int code, char *buffer )
 			snprintf( buffer, 29, "%s", "Unknown MQTT state code" );
 	}
 } // End of lookupMQTTCode() function.
+
+
+/**
+* @brief mqttConnect() will connect to the MQTT broker.
+*/
+void mqttConnect()
+{
+ long time = millis();
+ // Connect the first time.  Avoid subtraction overflow.  Connect after cool down.
+ if( lastMqttConnectionTime == 0 || ( time > mqttCoolDownInterval && ( time - mqttCoolDownInterval ) > lastMqttConnectionTime ) )
+ {
+	 mqttConnectCount++;
+	 digitalWrite( ONBOARD_LED, LED_OFF );
+	 Serial.println( "Connecting to the MQTT broker." );
+
+	 // setServer() call is now called in wifiMultiConnect().
+	 //mqttClient.setServer( mqttBroker, mqttPort );
+	 mqttClient.setCallback( mqttCallback );
+
+	 // Connect to the broker, using the MAC address as the client ID.
+	 if( mqttClient.connect( macAddress ) )
+	 {
+		 Serial.println( "Connected to the broker." );
+		 mqttClient.subscribe( MQTT_COMMAND_TOPIC );
+		 digitalWrite( ONBOARD_LED, LED_ON );
+	 }
+	 else
+	 {
+		 int mqttStateCode = mqttClient.state();
+		 char buffer[29];
+		 lookupMQTTCode( mqttStateCode, buffer );
+		 Serial.printf( "MQTT state: %s\n", buffer );
+		 Serial.printf( "MQTT state code: %d\n", mqttStateCode );
+
+		 // This block increments the broker connection "cooldown" time by 10 seconds after every failed connection, and resets it once it is over 2 minutes.
+		 if( mqttCoolDownInterval > 120000 )
+			 mqttCoolDownInterval = 0;
+		 mqttCoolDownInterval += 10000;
+	 }
+
+	 lastMqttConnectionTime = millis();
+ }
+} // End of the mqttConnect() function.
+
+
+/**
+* @brief publishTelemetry() will process incoming messages on subscribed topics.
+*/
+void publishTelemetry()
+{
+ publishCount++;
+ char topicBuffer[256] = "";
+ char valueBuffer[25] = "";
+
+ snprintf( topicBuffer, 256, "%s%s%s%s", TOPIC_PREFIX, macAddress, "/", RSSI_TOPIC );
+ snprintf( valueBuffer, 25, "%ld", rssi );
+ if( mqttClient.publish( topicBuffer, valueBuffer ) )
+	 Serial.printf( "Publishing '%s' to '%s'\n", valueBuffer, topicBuffer );
+
+ snprintf( topicBuffer, 256, "%s%s%s%s", TOPIC_PREFIX, macAddress, "/", MAC_TOPIC );
+ snprintf( valueBuffer, 25, "%s", macAddress );
+ if( mqttClient.publish( topicBuffer, valueBuffer ) )
+	 Serial.printf( "Publishing '%s' to '%s'\n", valueBuffer, topicBuffer );
+
+ snprintf( topicBuffer, 256, "%s%s%s%s", TOPIC_PREFIX, macAddress, "/", IP_TOPIC );
+ snprintf( valueBuffer, 25, "%s", ipAddress );
+ if( mqttClient.publish( topicBuffer, valueBuffer ) )
+	 Serial.printf( "Publishing '%s' to '%s'\n", valueBuffer, topicBuffer );
+} // End of the publishTelemetry() function.
+
+
+/**
+* @brief mqttCallback() will process incoming messages on subscribed topics.
+* { "command": "publishTelemetry" }
+* { "command": "changeTelemetryInterval", "value": 10000 }
+*/
+void mqttCallback( char *topic, byte *payload, unsigned int length )
+{
+ callbackCount++;
+ Serial.printf( "\nMessage arrived on Topic: '%s'\n", topic );
+
+ StaticJsonDocument<JSON_DOC_SIZE> callbackJsonDoc;
+ Serial.println( "JSON document (static) was created." );
+ deserializeJson( callbackJsonDoc, payload, length );
+ Serial.println( "JSON document was deserialized." );
+
+ const char *command = callbackJsonDoc["command"];
+ Serial.printf( "Processing command '%s'.\n", command );
+ if( strcmp( command, "changeTelemetryInterval" ) == 0 )
+ {
+	 unsigned long tempValue = callbackJsonDoc["value"];
+	 // Only update the value if it is greater than 4 seconds.  This prevents a seconds vs. milliseconds confusion.
+	 if( tempValue > 4000 )
+		 publishInterval = tempValue;
+	 Serial.printf( "MQTT publish interval has been updated to %u\n", publishInterval );
+	 lastPublishTime = 0;
+ }
+ else
+	 Serial.printf( "Unknown command '%s'\n", command );
+} // End of the mqttCallback() function.

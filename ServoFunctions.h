@@ -23,8 +23,8 @@ Servo azimuthServo;	// A Servo class object for controlling the azimuth directio
  * For continuous rotation servos, use the declared minimum and maximum values from the specification sheet.
  * If unknown, 500 μsec is the most common minimum, and 2500 μsec is the most common maximum.
  */
-const int declinationStopPin = 16; // The GPIO connected to the declination limit switch.
-const int inclinationStopPin = 17; // The GPIO connected to the inclination limit switch.
+const int declinationStopPin = 17; // The GPIO connected to the declination limit switch.
+const int inclinationStopPin = 16; // The GPIO connected to the inclination limit switch.
 const int azimuthServoPin = 23;	  // The GPIO which the azimuth servo connects to.
 const int altitudeServoPin = 22;	  // The GPIO which the altitude servo connects to.
 const int altitudeMaxAngle = 360;  // The "do not exceed" angle for the altitude servo.  This is used as a constraint to keep the tracker from trying to pitch beyond vertical.

@@ -54,7 +54,8 @@ void printTelemetry()
 	Serial.println( "MQTT stats:" );
 	Serial.printf( "  mqttConnectCount: %u\n", mqttConnectCount );
 	Serial.printf( "  mqttCoolDownInterval: %lu\n", mqttCoolDownInterval );
-	Serial.printf( "  Broker: %s:%d\n", mqttClient.getServerDomain(), mqttClient.getServerPort() );
+	if( mqttClient.connected() )
+		Serial.printf( "  Broker: %s:%d\n", mqttClient.getServerDomain(), mqttClient.getServerPort() );
 	lookupMQTTCode( mqttClient.state(), buffer );
 	Serial.printf( "  MQTT state: %s\n", buffer );
 	Serial.printf( "  Publish count: %lu\n", publishCount );
@@ -84,7 +85,7 @@ void printTelemetry()
 
 	if( abs( upperSum - lowerSum ) > 50 )
 	{
-		if( upperSum > lowerSum )
+		if( upperSum < lowerSum )
 			Serial.println( "Move up!" );
 		else
 			Serial.println( "Move down!" );
@@ -94,13 +95,17 @@ void printTelemetry()
 
 	if( abs( leftSum - rightSum ) > 50 )
 	{
-		if( leftSum > rightSum )
+		if( leftSum < rightSum )
 			Serial.println( "Move left!" );
 		else
 			Serial.println( "Move right!" );
 	}
 	else
 		Serial.println( "Azimuth hold!" );
+
+	Serial.printf( "inclinationStopPin: %d\n", digitalRead( inclinationStopPin ) );
+	Serial.printf( "declinationStopPin: %d\n", digitalRead( declinationStopPin ) );
+	Serial.printf( "altitudeSpeed: %d\n", altitudeSpeed );
 
 	Serial.printf( "Next telemetry poll in %lu seconds\n", telemetryPrintInterval / MILLIS_IN_SEC );
 	Serial.println( "\n" );
@@ -183,7 +188,7 @@ void loop()
 
 	//	Check the MQTT connection, and reconnect if needed.
 	if( !mqttClient.connected() )
-		mqttMultiConnect( 1 );
+		mqttConnect();
 	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
@@ -210,13 +215,5 @@ void loop()
 	{
 		printTelemetry();
 		lastTelemetryPrintTime = millis();
-	}
-
-	time = millis();
-	// Publish the first time.  Avoid subtraction overflow.  Publish every interval.
-	if( lastPublishTime == 0 || ( ( time > publishInterval ) && ( time - publishInterval ) > lastPublishTime ) )
-	{
-		publishTelemetry();
-		lastPublishTime = millis();
 	}
 } // End of loop() function.

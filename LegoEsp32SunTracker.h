@@ -35,9 +35,7 @@ void configureOTA();
 int checkForSSID( const char *ssidName );
 bool wifiConnect( const char *ssid, const char *password );
 void wifiMultiConnect();
-bool mqttMultiConnect( int maxAttempts );
-void publishStats();
-void publishTelemetry();
+void mqttConnect();
 void lookupWifiCode( int code, char *buffer );
 void lookupMQTTCode( int code, char *buffer );
 // LegoEsp32SunTracker.ino
@@ -66,19 +64,18 @@ PubSubClient mqttClient( espClient ); // Create a PubSub MQTT client object that
 /**
  * Other global constants.
  */
-const char *HOST_NAME = "LegoEsp32SunTracker";				  // The hostname used for OTA access.
-const char *SKETCH_NAME = "LegoEsp32SunTracker.ino";		  // The name used when publishing stats.
-const char *NOTES = "The ESP32 sun tracker";					  // The hostname used for OTA access.
-const char *MQTT_STATS_TOPIC = "sunTracker/stats";			  // The topic this device will publish to upon connection to the broker.
-const char *MQTT_COMMAND_TOPIC = "sunTracker/commands";	  // The command topic this device will subscribe to.
-const char *sketchTopic = "sunTracker/sketch";				  // The topic used to publish the sketch name (__FILE__).
-const char *macTopic = "sunTracker/mac";						  // The topic used to publish the MAC address.
-const char *ipTopic = "sunTracker/ip";							  // The topic used to publish the IP address.
-const char *rssiTopic = "sunTracker/rssi";					  // The topic used to publish the Wi-Fi Received Signal Strength Indicator.
-const char *publishCountTopic = "sunTracker/publishCount"; // The topic used to publish the loop count.
-const char *notesTopic = "sunTracker/notes";					  // The topic used to publish notes relevant to this project.
-const unsigned long JSON_DOC_SIZE = 512;						  // The ArduinoJson document size, and size of some buffers.
-const unsigned int MILLIS_IN_SEC = 1000;						  // The number of milliseconds in one second.
+const char *HOST_NAME = "LegoEsp32SunTracker";			  // The hostname used for OTA access.
+const char *SKETCH_NAME = "LegoEsp32SunTracker.ino";	  // The name used when publishing stats.
+const char *NOTES = "The ESP32 sun tracker";				  // The hostname used for OTA access.
+const char *MQTT_STATS_TOPIC = "sunTracker/stats";		  // The topic this device will publish to upon connection to the broker.
+const char *MQTT_COMMAND_TOPIC = "sunTracker/commands"; // The command topic this device will subscribe to.
+const char *sketchTopic = "sunTracker/sketch";			  // The topic used to publish the sketch name (__FILE__).
+const char *MAC_TOPIC = "/mac";								  // The topic used to publish the MAC address.
+const char *IP_TOPIC = "/ip";									  // The topic used to publish the IP address.
+const char *RSSI_TOPIC = "/rssi";							  // The topic used to publish the Wi-Fi Received Signal Strength Indicator.
+const char *TOPIC_PREFIX = "sunTracker/";					  // The topic segment that comes before the MAC address.
+const unsigned long JSON_DOC_SIZE = 512;					  // The ArduinoJson document size, and size of some buffers.
+const unsigned int MILLIS_IN_SEC = 1000;					  // The number of milliseconds in one second.
 const int upperLeftGPIO = 36;
 const int upperRightGPIO = 39;
 const int lowerLeftGPIO = 34;
@@ -105,6 +102,7 @@ unsigned int telemetryPrintInterval = 5000;	// How long to wait between sensor p
 unsigned int publishInterval = 60000;			// How long to wait between MQTT publishes.
 unsigned int callbackCount = 0;					// The number of times a callback was received.
 unsigned int MCU_LED = 2;							// The GPIO which the onboard LED is connected to.
+const unsigned int ONBOARD_LED = 2;				// The GPIO which the onboard LED is connected to.
 unsigned int wifiConnectCount = 0;				// A counter for how many times the wifiConnect() function has been called.
 unsigned int mqttConnectCount = 0;				// A counter for how many times the mqttConnect() function has been called.
 unsigned long publishCount = 0;					// A counter of how many times the stats have been published.
