@@ -178,9 +178,8 @@ void loop()
 	// Process OTA requests.
 	ArduinoOTA.handle();
 
-	unsigned long time = millis();
-	// Poll the first time.  Avoid subtraction overflow.  Poll every interval.
-	if( lastTelemetryPollTime == 0 || ( ( time > telemetryPollInterval ) && ( time - telemetryPollInterval ) > lastTelemetryPollTime ) )
+	// Poll the first time.  Poll every interval.
+	if( lastTelemetryPollTime == 0 || ( millis() - lastTelemetryPollTime > telemetryPollInterval ) )
 	{
 		readTelemetry();
 		lastTelemetryPollTime = millis();
@@ -192,9 +191,8 @@ void loop()
 	// The MQTT client loop() function facilitates the receiving of messages and maintains the connection to the broker.
 	mqttClient.loop();
 
-	time = millis();
-	// Process the first time.  Avoid subtraction overflow.  Process every interval.
-	if( lastTelemetryProcessTime == 0 || ( ( time > telemetryProcessInterval ) && ( time - telemetryProcessInterval ) > lastTelemetryProcessTime ) )
+	// Process the first time.  Process every interval.
+	if( lastTelemetryProcessTime == 0 || ( millis() - lastTelemetryProcessTime > telemetryProcessInterval ) )
 	{
 		moveArm();
 		lastTelemetryProcessTime = millis();
@@ -209,9 +207,8 @@ void loop()
 		}
 	}
 
-	time = millis();
-	// Print the first time.  Avoid subtraction overflow.  Print every interval.
-	if( lastTelemetryPrintTime == 0 || ( ( time > telemetryPrintInterval ) && ( time - telemetryPrintInterval ) > lastTelemetryPrintTime ) )
+	// Print the first time.  Print every interval.
+	if( lastTelemetryPrintTime == 0 || ( millis() - lastTelemetryPrintTime > telemetryPrintInterval ) )
 	{
 		printTelemetry();
 		lastTelemetryPrintTime = millis();

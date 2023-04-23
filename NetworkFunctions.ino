@@ -171,8 +171,7 @@ bool wifiConnect( const char *ssid, const char *password )
  */
 void wifiMultiConnect()
 {
-	long time = millis();
-	if( lastWifiConnectTime == 0 || ( time > wifiCoolDownInterval && ( time - wifiCoolDownInterval ) > lastWifiConnectTime ) )
+	if( lastWifiConnectTime == 0 || ( millis() - lastWifiConnectTime > wifiCoolDownInterval ) )
 	{
 		Serial.println( "\nEntering wifiMultiConnect()" );
 		digitalWrite( ONBOARD_LED, LED_OFF ); // Turn the LED off to show that Wi-Fi is not yet connected.
@@ -293,9 +292,8 @@ void lookupMQTTCode( int code, char *buffer )
 */
 void mqttConnect()
 {
- long time = millis();
- // Connect the first time.  Avoid subtraction overflow.  Connect after cool down.
- if( lastMqttConnectionTime == 0 || ( time > mqttCoolDownInterval && ( time - mqttCoolDownInterval ) > lastMqttConnectionTime ) )
+ // Connect the first time.  Connect after cool down.
+ if( lastMqttConnectionTime == 0 || ( millis() - lastMqttConnectionTime > mqttCoolDownInterval ) )
  {
 	 mqttConnectCount++;
 	 digitalWrite( ONBOARD_LED, LED_OFF );

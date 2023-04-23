@@ -121,6 +121,8 @@ void moveArm()
 		else
 			altitudeSpeed = 5;
 	}
+	else
+		altitudeSpeed = 0;
 	// Don't allow upwards movement if the inclination limit switch is shorted to ground.
 	if( altitudeSpeed > 0 && digitalRead( inclinationStopPin ) == 0 )
 		altitudeSpeed = 0;
@@ -147,14 +149,14 @@ void moveArm()
 		else
 			azimuthSpeed = -50;
 	}
-	else if( abs( leftSum - rightSum ) > 100 )
+	else if( abs( leftSum - rightSum ) > 200 )
 	{
 		if( leftSum > rightSum )
 			azimuthSpeed = 30;
 		else
 			azimuthSpeed = -30;
 	}
-	else if( abs( leftSum - rightSum ) > 50 )
+	else if( abs( leftSum - rightSum ) > 100 )
 	{
 		if( leftSum > rightSum )
 			azimuthSpeed = 15;
