@@ -106,6 +106,22 @@ void printTelemetry()
 	Serial.printf( "inclinationStopPin: %d\n", digitalRead( inclinationStopPin ) );
 	Serial.printf( "declinationStopPin: %d\n", digitalRead( declinationStopPin ) );
 	Serial.printf( "altitudeSpeed: %d\n", altitudeSpeed );
+	Serial.printf( "azimuthSpeed: %d\n", azimuthSpeed );
+
+	char valueBuffer[25] = "";
+	snprintf( valueBuffer, 25, "%d", altitudeSpeed );
+	mqttClient.publish( "LegoSunTracker/altitudeSpeed", valueBuffer );
+	snprintf( valueBuffer, 25, "%d", azimuthSpeed );
+	mqttClient.publish( "LegoSunTracker/azimuthSpeed", valueBuffer );
+
+	snprintf( valueBuffer, 25, "%d", upperLeftValue );
+	mqttClient.publish( "LegoSunTracker/upperLeftValue", valueBuffer );
+	snprintf( valueBuffer, 25, "%d", upperRightValue );
+	mqttClient.publish( "LegoSunTracker/upperRightValue", valueBuffer );
+	snprintf( valueBuffer, 25, "%d", lowerLeftValue );
+	mqttClient.publish( "LegoSunTracker/lowerLeftValue", valueBuffer );
+	snprintf( valueBuffer, 25, "%d", lowerRightValue );
+	mqttClient.publish( "LegoSunTracker/lowerRightValue", valueBuffer );
 
 	Serial.printf( "Next telemetry poll in %lu seconds\n", telemetryPrintInterval / MILLIS_IN_SEC );
 	Serial.println( "\n" );

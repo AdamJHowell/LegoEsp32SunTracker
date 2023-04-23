@@ -93,36 +93,37 @@ void moveArm()
 	//	╭────────────╮
 	//	│  Altitude  │
 	//	╰────────────╯
-	if( abs( upperSum - lowerSum ) > 1000 )
+	if( abs( upperSum - lowerSum ) > 2000 )
+	{
+		if( upperSum > lowerSum )
+			altitudeSpeed = -60;
+		else
+			altitudeSpeed = 60;
+	}
+	else if( abs( upperSum - lowerSum ) > 1000 )
+	{
+		if( upperSum > lowerSum )
+			altitudeSpeed = -40;
+		else
+			altitudeSpeed = 40;
+	}
+	else if( abs( upperSum - lowerSum ) > 500 )
 	{
 		if( upperSum > lowerSum )
 			altitudeSpeed = -30;
 		else
 			altitudeSpeed = 30;
 	}
-	else if( abs( upperSum - lowerSum ) > 700 )
+	else if( abs( upperSum - lowerSum ) > 200 )
 	{
 		if( upperSum > lowerSum )
 			altitudeSpeed = -20;
 		else
 			altitudeSpeed = 20;
 	}
-	else if( abs( upperSum - lowerSum ) > 100 )
-	{
-		if( upperSum > lowerSum )
-			altitudeSpeed = -10;
-		else
-			altitudeSpeed = 10;
-	}
-	else if( abs( upperSum - lowerSum ) > 50 )
-	{
-		if( upperSum > lowerSum )
-			altitudeSpeed = -5;
-		else
-			altitudeSpeed = 5;
-	}
 	else
 		altitudeSpeed = 0;
+
 	// Don't allow upwards movement if the inclination limit switch is shorted to ground.
 	if( altitudeSpeed > 0 && digitalRead( inclinationStopPin ) == 0 )
 		altitudeSpeed = 0;
@@ -149,14 +150,14 @@ void moveArm()
 		else
 			azimuthSpeed = -50;
 	}
-	else if( abs( leftSum - rightSum ) > 200 )
+	else if( abs( leftSum - rightSum ) > 400 )
 	{
 		if( leftSum > rightSum )
 			azimuthSpeed = 30;
 		else
 			azimuthSpeed = -30;
 	}
-	else if( abs( leftSum - rightSum ) > 100 )
+	else if( abs( leftSum - rightSum ) > 200 )
 	{
 		if( leftSum > rightSum )
 			azimuthSpeed = 15;
