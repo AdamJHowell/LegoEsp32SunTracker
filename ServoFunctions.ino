@@ -74,7 +74,7 @@ void setAzimuthSpeed( int speed )
 
 
 /**
- * @brief This function uses the analog readings to determine how the servos should be moved.
+ * @brief This function uses the analog readings (globals populated by the readTelemetry() function) to determine the servos PWM values.
  * Nothing in this function is blocking.
  */
 void moveArm()
